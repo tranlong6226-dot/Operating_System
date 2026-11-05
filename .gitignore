@@ -1,0 +1,41 @@
+# Keil uVision build outputs and intermediate files
+*.o
+*.d
+*.crf
+*.axf
+*.build_log.htm
+*.dep
+*.map
+*.lst
+*.lnp
+*.htm
+firmware/MDK-ARM/firmware/
+firmware/MDK-ARM/DebugConfig/
+firmware/MDK-ARM/RTE/
+firmware/MDK-ARM/*.uvguix.*
+firmware/MDK-ARM/*.uvgui.*
+firmware/MDK-ARM/*.bak
+
+# CubeMX backups
+*.bak
+*.orig
+
+# Python & testing
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.exe
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Personal & AI Pair-Programming local files
+AGENTS.md
+*.svg
+scratch/
+temp/
+*.tmp
