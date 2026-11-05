@@ -37,8 +37,12 @@ task.h is included from an application file. */
 #include "task.h"
 #include "queue.h"
 
+
 #if ( configUSE_CO_ROUTINES == 1 )
 	#include "croutine.h"
+#endif
+#if ( configRTSFR_ENABLE == 1 )
+    #include "rtsfr_resource.h"
 #endif
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
@@ -1468,6 +1472,13 @@ Queue_t * const pxQueue = xQueue;
 						/* Record the information required to implement
 						priority inheritance should it become necessary. */
 						pxQueue->u.xSemaphore.xMutexHolder = pvTaskIncrementMutexHeldCount();
+			/* RTSFR BEGIN: M3 - record owner AFTER a successful take (inside critical section) */
+                   #if ( configRTSFR_ENABLE == 1 )
+						{
+                 	     rtsfr_resource_hook_mutex_taken( pxQueue, pxQueue->u.xSemaphore.xMutexHolder );
+											}
+                   #endif
+			/* RTSFR END */
 					}
 					else
 					{
@@ -2088,6 +2099,17 @@ UBaseType_t uxMessagesWaiting;
 			{
 				/* The mutex is no longer being held. */
 				xReturn = xTaskPriorityDisinherit( pxQueue->u.xSemaphore.xMutexHolder );
+
+				/* RTSFR BEGIN: M3 - record release BEFORE the holder is cleared (inside critical section) */
+
+            #if ( configRTSFR_ENABLE == 1 )
+
+				{
+				  rtsfr_resource_hook_mutex_given( pxQueue, pxQueue->u.xSemaphore.xMutexHolder );
+				}
+            #endif
+				/* RTSFR END */
+
 				pxQueue->u.xSemaphore.xMutexHolder = NULL;
 			}
 			else

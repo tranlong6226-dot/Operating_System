@@ -1,0 +1,3 @@
+../Core/Src/freertos.c:71:6:vApplicationMallocFailedHook	1
+../Core/Src/freertos.c:91:6:MX_FREERTOS_Init	1
+../Core/Src/freertos.c:133:6:StartDefaultTask	1

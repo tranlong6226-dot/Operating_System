@@ -1,0 +1,15 @@
+../mylib/rtsfr_resource.c:17:6:rtsfr_resource_on_mutex_acquire	4
+../mylib/rtsfr_resource.c:27:6:rtsfr_resource_on_mutex_release	4
+../mylib/rtsfr_resource.c:37:6:rtsfr_resource_on_new_generation	2
+../mylib/rtsfr_resource.c:47:13:compute_summary	12
+../mylib/rtsfr_resource.c:68:16:rtsfr_resource_snapshot	4
+../mylib/rtsfr_resource.c:79:16:rtsfr_resource_cleanup_safe	7
+../mylib/rtsfr_resource.c:97:16:rtsfr_buffer_acquire	5
+../mylib/rtsfr_resource.c:113:16:rtsfr_buffer_release	5
+../mylib/rtsfr_resource.c:130:16:rtsfr_resource_register_mutex	8
+../mylib/rtsfr_resource.c:149:16:rtsfr_resource_unregister_mutex	5
+../mylib/rtsfr_resource.c:165:13:find_mutex	4
+../mylib/rtsfr_resource.c:171:31:rtsfr_detect_task_id_from_handle	1
+../mylib/rtsfr_resource.c:174:6:rtsfr_resource_hook_mutex_taken	3
+../mylib/rtsfr_resource.c:184:6:rtsfr_resource_hook_mutex_given	4
+../mylib/rtsfr_resource.c:194:10:rtsfr_resource_get_anomaly_count	1

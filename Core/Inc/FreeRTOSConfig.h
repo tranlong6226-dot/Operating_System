@@ -75,6 +75,7 @@
 #define configUSE_COUNTING_SEMAPHORES            1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION  0
 #define configRECORD_STACK_HIGH_ADDRESS          1
+#define configRTSFR_ENABLE                       1
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES                    0

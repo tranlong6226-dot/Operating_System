@@ -1,0 +1,12 @@
+../mylib/rtsfr_detect.c:44:13:prv_enqueue_event	2
+../mylib/rtsfr_detect.c:57:16:rtsfr_detect_init	1
+../mylib/rtsfr_detect.c:70:16:rtsfr_register_task	4
+../mylib/rtsfr_detect.c:98:16:rtsfr_report_progress	6
+../mylib/rtsfr_detect.c:129:16:rtsfr_begin_expected_wait	5
+../mylib/rtsfr_detect.c:157:16:rtsfr_end_expected_wait	5
+../mylib/rtsfr_detect.c:184:16:rtsfr_detect_scan	10
+../mylib/rtsfr_detect.c:240:6:rtsfr_detect_pop_event	3
+../mylib/rtsfr_detect.c:260:6:rtsfr_detect_on_new_generation	7
+../mylib/rtsfr_detect.c:313:6:rtsfr_detect_on_task_delete	4
+../mylib/rtsfr_detect.c:330:16:rtsfr_detect_get_record	4
+../mylib/rtsfr_detect.c:349:9:rtsfr_detect_task_id_from_handle	5
