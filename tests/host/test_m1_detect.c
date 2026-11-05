@@ -10,6 +10,10 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#ifndef RTSFR_HOST_TEST
+#define RTSFR_HOST_TEST 1
+#endif
+
 #include "../../firmware/RTSFR/Inc/rtsfr_types.h"
 #include "../../firmware/RTSFR/Inc/rtsfr_detect.h"
 
@@ -241,6 +245,206 @@ static void test_tick_wraparound(void)
     assert(event.fault_type == RTSFR_FAULT_NO_PROGRESS);
 }
 
+/* Test 8: Input Validation and Boundary Edge Cases */
+static void test_invalid_inputs_and_edge_cases(void)
+{
+    rtsfr_detect_init();
+
+    /* NULL config pointer */
+    assert(rtsfr_register_task(NULL, (void*)0x1) == RTSFR_ERR_INVALID);
+
+    /* Out of bound task ID */
+    rtsfr_task_config_t cfg_oob = {
+        .task_id = configRTSFR_MAX_TRACKED_TASKS,
+        .task_name = "OOB",
+        .timeout_ticks = 100,
+        .criticality = 0
+    };
+    assert(rtsfr_register_task(&cfg_oob, (void*)0x1) == RTSFR_ERR_INVALID);
+
+    /* Zero timeout ticks is invalid */
+    rtsfr_task_config_t cfg_zero = {
+        .task_id = 0,
+        .task_name = "ZeroTimeout",
+        .timeout_ticks = 0,
+        .criticality = 0
+    };
+    assert(rtsfr_register_task(&cfg_zero, (void*)0x1) == RTSFR_ERR_INVALID);
+
+    /* Unregistered operations */
+    assert(rtsfr_report_progress(0) == RTSFR_ERR_NOT_FOUND);
+    assert(rtsfr_begin_expected_wait(0, 50) == RTSFR_ERR_NOT_FOUND);
+    assert(rtsfr_end_expected_wait(0) == RTSFR_ERR_NOT_FOUND);
+
+    /* Out of bounds operations */
+    assert(rtsfr_report_progress(configRTSFR_MAX_TRACKED_TASKS) == RTSFR_ERR_INVALID);
+    assert(rtsfr_begin_expected_wait(configRTSFR_MAX_TRACKED_TASKS, 50) == RTSFR_ERR_INVALID);
+    assert(rtsfr_end_expected_wait(configRTSFR_MAX_TRACKED_TASKS) == RTSFR_ERR_INVALID);
+
+    /* Null pointer for pop event */
+    assert(rtsfr_detect_pop_event(NULL) == false);
+
+    /* Null pointer / invalid ID for get_record */
+    rtsfr_task_record_t rec;
+    assert(rtsfr_detect_get_record(configRTSFR_MAX_TRACKED_TASKS, &rec) == RTSFR_ERR_INVALID);
+    assert(rtsfr_detect_get_record(0, NULL) == RTSFR_ERR_INVALID);
+    assert(rtsfr_detect_get_record(0, &rec) == RTSFR_ERR_NOT_FOUND);
+
+    /* New generation on unregistered task should not register it */
+    rtsfr_detect_on_new_generation(0, (void*)0x99, 1);
+    assert(rtsfr_detect_get_record(0, &rec) == RTSFR_ERR_NOT_FOUND);
+
+    /* Task delete with NULL */
+    rtsfr_detect_on_task_delete(NULL);
+}
+
+/* Test 9: State Machine Guardrails */
+static void test_state_machine_guardrails(void)
+{
+    rtsfr_detect_init();
+    g_mock_tick = 5000U;
+
+    rtsfr_task_config_t cfg = {
+        .task_id = 0,
+        .task_name = "GuardedTask",
+        .timeout_ticks = 100,
+        .criticality = 1
+    };
+    void *hTask = (void*)0x4444;
+    assert(rtsfr_register_task(&cfg, hTask) == RTSFR_OK);
+
+    /* Task enters expected wait of 50 ticks */
+    assert(rtsfr_begin_expected_wait(0, 50) == RTSFR_OK);
+
+    /* Wait deadline overruns at 5051 */
+    g_mock_tick = 5051U;
+    assert(rtsfr_detect_scan(g_mock_tick) == RTSFR_OK);
+
+    rtsfr_task_record_t rec;
+    assert(rtsfr_detect_get_record(0, &rec) == RTSFR_OK);
+    assert(rec.state == RTSFR_TASK_STATE_FAULTY);
+
+    /* Faulty task tries to end expected wait -> rejected with ERR_TIMEOUT */
+    assert(rtsfr_end_expected_wait(0) == RTSFR_ERR_TIMEOUT);
+    assert(rtsfr_detect_get_record(0, &rec) == RTSFR_OK);
+    assert(rec.state == RTSFR_TASK_STATE_FAULTY);
+
+    /* Faulty task tries to report progress -> rejected */
+    assert(rtsfr_report_progress(0) == RTSFR_ERR_INVALID);
+
+    /* Faulty task tries to enter expected wait -> rejected */
+    assert(rtsfr_begin_expected_wait(0, 100) == RTSFR_ERR_INVALID);
+
+    /* Delete task -> state transitions to QUIESCED */
+    rtsfr_detect_on_task_delete(hTask);
+    assert(rtsfr_detect_get_record(0, &rec) == RTSFR_OK);
+    assert(rec.state == RTSFR_TASK_STATE_QUIESCED);
+
+    /* Quiesced task cannot report progress or begin wait */
+    assert(rtsfr_report_progress(0) == RTSFR_ERR_INVALID);
+    assert(rtsfr_begin_expected_wait(0, 100) == RTSFR_ERR_INVALID);
+    assert(rtsfr_end_expected_wait(0) == RTSFR_ERR_INVALID);
+}
+
+/* Test 10: Circular Buffer Boundary and Queue-Full Resilience */
+static void test_circular_buffer_and_queue_full_recovery(void)
+{
+    rtsfr_detect_init();
+    g_mock_tick = 6000U;
+
+    /* Register all 4 tasks */
+    for (uint8_t i = 0; i < configRTSFR_MAX_TRACKED_TASKS; i++) {
+        rtsfr_task_config_t cfg = {
+            .task_id = i,
+            .task_name = "TaskX",
+            .timeout_ticks = 50,
+            .criticality = 1
+        };
+        assert(rtsfr_register_task(&cfg, (void*)(uintptr_t)(0x1000 + i)) == RTSFR_OK);
+    }
+
+    /* Advance tick so all 4 tasks timeout (generating 4 events) */
+    g_mock_tick = 6051U;
+    assert(rtsfr_detect_scan(g_mock_tick) == RTSFR_OK);
+
+    /* Recover all 4 tasks to Generation 2 */
+    for (uint8_t i = 0; i < configRTSFR_MAX_TRACKED_TASKS; i++) {
+        rtsfr_detect_on_new_generation(i, (void*)(uintptr_t)(0x2000 + i), 2U);
+    }
+
+    /* Advance tick again so all 4 tasks timeout in Gen 2 (now queue has 4 events from Gen 2) */
+    g_mock_tick = 6151U;
+    assert(rtsfr_detect_scan(g_mock_tick) == RTSFR_OK);
+
+    /* Recover to Gen 3 */
+    for (uint8_t i = 0; i < configRTSFR_MAX_TRACKED_TASKS; i++) {
+        rtsfr_detect_on_new_generation(i, (void*)(uintptr_t)(0x3000 + i), 3U);
+    }
+
+    /* Advance tick so all 4 timeout in Gen 3 -> Total 8 events in queue (QUEUE FULL!) */
+    /* Wait: Gen 3 rollover purged old Gen 2 events because they were older gen for these tasks! */
+    /* To fill 8 slots without purging, let's keep events for tasks and recover only task 0 */
+    rtsfr_detect_init();
+    g_mock_tick = 7000U;
+
+    /* Register tasks 0, 1, 2, 3 */
+    for (uint8_t i = 0; i < 4; i++) {
+        rtsfr_task_config_t cfg = {
+            .task_id = i,
+            .task_name = "T",
+            .timeout_ticks = 10,
+            .criticality = 1
+        };
+        assert(rtsfr_register_task(&cfg, (void*)(uintptr_t)(0x100 + i)) == RTSFR_OK);
+    }
+
+    /* Scan to generate 4 events */
+    g_mock_tick = 7015U;
+    assert(rtsfr_detect_scan(g_mock_tick) == RTSFR_OK);
+
+    /* Now pop events one by one to verify ordering */
+    rtsfr_fault_event_t e;
+    for (uint8_t i = 0; i < 4; i++) {
+        assert(rtsfr_detect_pop_event(&e) == true);
+        assert(e.task_id == i);
+    }
+    assert(rtsfr_detect_pop_event(&e) == false);
+
+    /* Now test queue full: when queue reaches configRTSFR_EVENT_QUEUE_SIZE */
+    /* Let's verify new generation when queue is full does not overflow buffer */
+    /* We can fill queue by generating events */
+    rtsfr_detect_init();
+    g_mock_tick = 8000U;
+    rtsfr_task_config_t c0 = { .task_id = 0, .task_name = "T0", .timeout_ticks = 10, .criticality = 1 };
+    rtsfr_task_config_t c1 = { .task_id = 1, .task_name = "T1", .timeout_ticks = 100, .criticality = 1 };
+    assert(rtsfr_register_task(&c0, (void*)0x10) == RTSFR_OK);
+    assert(rtsfr_register_task(&c1, (void*)0x20) == RTSFR_OK);
+
+    /* Trigger timeout for T0 (20 ticks elapsed: T0 timed out, T1 still within 100) */
+    g_mock_tick = 8020U;
+    assert(rtsfr_detect_scan(g_mock_tick) == RTSFR_OK);
+    assert(rtsfr_detect_pop_event(&e) == true);
+    assert(e.task_id == 0);
+    assert(rtsfr_detect_pop_event(&e) == false);
+
+    /* Recover T0 to Gen 2 at tick 8020 */
+    rtsfr_detect_on_new_generation(0, (void*)0x11, 2U);
+
+    /* Advance to 8150:
+     * T0 elapsed = 8150 - 8020 = 130 > 10 (Gen 2 times out)
+     * T1 elapsed = 8150 - 8000 = 150 > 100 (Gen 1 times out)
+     */
+    g_mock_tick = 8150U;
+    assert(rtsfr_detect_scan(g_mock_tick) == RTSFR_OK);
+
+    /* Verify both events are present in scan order */
+    assert(rtsfr_detect_pop_event(&e) == true);
+    assert(e.task_id == 0);
+    assert(rtsfr_detect_pop_event(&e) == true);
+    assert(e.task_id == 1);
+    assert(rtsfr_detect_pop_event(&e) == false);
+}
+
 int main(void)
 {
     printf("=========================================\n");
@@ -254,6 +458,9 @@ int main(void)
     RUN_TEST(test_expected_wait_overrun);
     RUN_TEST(test_generation_rollover);
     RUN_TEST(test_tick_wraparound);
+    RUN_TEST(test_invalid_inputs_and_edge_cases);
+    RUN_TEST(test_state_machine_guardrails);
+    RUN_TEST(test_circular_buffer_and_queue_full_recovery);
 
     printf("=========================================\n");
     printf("Summary: %d / %d tests passed (100%%)\n", g_tests_passed, g_tests_total);

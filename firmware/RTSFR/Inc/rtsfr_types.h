@@ -14,10 +14,15 @@
 extern "C" {
 #endif
 
-/* Forward declaration of FreeRTOS types if not included */
-#ifndef INC_FREERTOS_H
-typedef uint32_t TickType_t;
-typedef void * TaskHandle_t;
+/* FreeRTOS types or Host Test forward declarations */
+#if defined(RTSFR_HOST_TEST) || (!defined(USE_HAL_DRIVER) && !defined(STM32F103xB) && !defined(__arm__) && !defined(__ARMCC_VERSION))
+    #ifndef INC_FREERTOS_H
+    typedef uint32_t TickType_t;
+    typedef void * TaskHandle_t;
+    #endif
+#else
+    #include "FreeRTOS.h"
+    #include "task.h"
 #endif
 
 /* Maximum number of tasks tracked by RTSFR */

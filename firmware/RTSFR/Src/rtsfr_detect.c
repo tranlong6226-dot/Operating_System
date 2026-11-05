@@ -8,18 +8,18 @@
 #include <string.h>
 
 /* FreeRTOS or Host Test compatibility */
-#if defined(INC_FREERTOS_H) || defined(FREERTOS_H)
-    #include "FreeRTOS.h"
-    #include "task.h"
-    #define RTSFR_ENTER_CRITICAL() taskENTER_CRITICAL()
-    #define RTSFR_EXIT_CRITICAL()  taskEXIT_CRITICAL()
-    #define RTSFR_GET_TICK()       xTaskGetTickCount()
-#else
+#if defined(RTSFR_HOST_TEST) || (!defined(USE_HAL_DRIVER) && !defined(STM32F103xB) && !defined(__arm__) && !defined(__ARMCC_VERSION))
     /* Mock stubs for Host Unit Testing */
     extern TickType_t g_mock_tick;
     #define RTSFR_ENTER_CRITICAL() do {} while(0)
     #define RTSFR_EXIT_CRITICAL()  do {} while(0)
     #define RTSFR_GET_TICK()       (g_mock_tick)
+#else
+    #include "FreeRTOS.h"
+    #include "task.h"
+    #define RTSFR_ENTER_CRITICAL() taskENTER_CRITICAL()
+    #define RTSFR_EXIT_CRITICAL()  taskEXIT_CRITICAL()
+    #define RTSFR_GET_TICK()       xTaskGetTickCount()
 #endif
 
 /* Global Monotonically Increasing Event Counter */
@@ -63,7 +63,7 @@ rtsfr_status_t rtsfr_detect_init(void)
 
 rtsfr_status_t rtsfr_register_task(const rtsfr_task_config_t *cfg, TaskHandle_t task_handle)
 {
-    if (cfg == NULL || cfg->task_id >= configRTSFR_MAX_TRACKED_TASKS) {
+    if (cfg == NULL || cfg->task_id >= configRTSFR_MAX_TRACKED_TASKS || cfg->timeout_ticks == 0U) {
         return RTSFR_ERR_INVALID;
     }
 
@@ -98,6 +98,11 @@ rtsfr_status_t rtsfr_report_progress(uint8_t task_id)
         return RTSFR_ERR_NOT_FOUND;
     }
 
+    if (rec->state == RTSFR_TASK_STATE_FAULTY || rec->state == RTSFR_TASK_STATE_QUIESCED) {
+        RTSFR_EXIT_CRITICAL();
+        return RTSFR_ERR_INVALID;
+    }
+
     rec->last_progress_tick = RTSFR_GET_TICK();
     rec->progress_seq++;
 
@@ -124,6 +129,11 @@ rtsfr_status_t rtsfr_begin_expected_wait(uint8_t task_id, TickType_t timeout)
         return RTSFR_ERR_NOT_FOUND;
     }
 
+    if (rec->state != RTSFR_TASK_STATE_HEALTHY && rec->state != RTSFR_TASK_STATE_EXPECTED_WAIT) {
+        RTSFR_EXIT_CRITICAL();
+        return RTSFR_ERR_INVALID;
+    }
+
     TickType_t now = RTSFR_GET_TICK();
     rec->state = RTSFR_TASK_STATE_EXPECTED_WAIT;
     rec->expected_wait_deadline = now + timeout;
@@ -147,6 +157,12 @@ rtsfr_status_t rtsfr_end_expected_wait(uint8_t task_id)
         return RTSFR_ERR_NOT_FOUND;
     }
 
+    if (rec->state != RTSFR_TASK_STATE_EXPECTED_WAIT) {
+        rtsfr_status_t ret = (rec->state == RTSFR_TASK_STATE_FAULTY) ? RTSFR_ERR_TIMEOUT : RTSFR_ERR_INVALID;
+        RTSFR_EXIT_CRITICAL();
+        return ret;
+    }
+
     rec->last_progress_tick = RTSFR_GET_TICK();
     rec->state = RTSFR_TASK_STATE_HEALTHY;
 
@@ -167,18 +183,19 @@ rtsfr_status_t rtsfr_detect_scan(TickType_t current_tick)
 
             if ((elapsed > rec->timeout_ticks) && (!rec->fault_pending)) {
                 /* Task stopped reporting progress (F01) */
-                rec->state = RTSFR_TASK_STATE_FAULTY;
-                rec->fault_pending = true;
-
                 rtsfr_fault_event_t event;
-                event.event_id = s_next_event_id++;
+                event.event_id = s_next_event_id;
                 event.task_id = rec->task_id;
                 event.generation = rec->generation;
                 event.fault_type = RTSFR_FAULT_NO_PROGRESS;
                 event.detected_tick = current_tick;
                 event.last_progress_seq = rec->progress_seq;
 
-                (void)prv_enqueue_event(&event);
+                if (prv_enqueue_event(&event)) {
+                    s_next_event_id++;
+                    rec->state = RTSFR_TASK_STATE_FAULTY;
+                    rec->fault_pending = true;
+                }
             }
         }
         else if (rec->state == RTSFR_TASK_STATE_EXPECTED_WAIT) {
@@ -188,18 +205,19 @@ rtsfr_status_t rtsfr_detect_scan(TickType_t current_tick)
 
             if ((elapsed > allowed) && (!rec->fault_pending)) {
                 /* Task exceeded declared wait duration (F04) */
-                rec->state = RTSFR_TASK_STATE_FAULTY;
-                rec->fault_pending = true;
-
                 rtsfr_fault_event_t event;
-                event.event_id = s_next_event_id++;
+                event.event_id = s_next_event_id;
                 event.task_id = rec->task_id;
                 event.generation = rec->generation;
                 event.fault_type = RTSFR_FAULT_WAIT_TIMEOUT;
                 event.detected_tick = current_tick;
                 event.last_progress_seq = rec->progress_seq;
 
-                (void)prv_enqueue_event(&event);
+                if (prv_enqueue_event(&event)) {
+                    s_next_event_id++;
+                    rec->state = RTSFR_TASK_STATE_FAULTY;
+                    rec->fault_pending = true;
+                }
             }
         }
     }
@@ -237,6 +255,11 @@ void rtsfr_detect_on_new_generation(uint8_t task_id, TaskHandle_t new_handle, ui
     RTSFR_ENTER_CRITICAL();
     rtsfr_task_record_t *rec = &s_registry[task_id];
 
+    if (rec->state == RTSFR_TASK_STATE_UNREGISTERED) {
+        RTSFR_EXIT_CRITICAL();
+        return;
+    }
+
     rec->generation = new_generation;
     rec->task_handle = new_handle;
     rec->last_progress_tick = RTSFR_GET_TICK();
@@ -263,7 +286,7 @@ void rtsfr_detect_on_new_generation(uint8_t task_id, TaskHandle_t new_handle, ui
         s_event_queue[i] = temp_queue[i];
     }
     s_queue_tail = 0U;
-    s_queue_head = valid_count;
+    s_queue_head = (uint8_t)(valid_count % configRTSFR_EVENT_QUEUE_SIZE);
     s_queue_count = valid_count;
 
     RTSFR_EXIT_CRITICAL();

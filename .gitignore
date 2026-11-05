@@ -9,6 +9,7 @@
 *.lst
 *.lnp
 *.htm
+*.log
 firmware/MDK-ARM/firmware/
 firmware/MDK-ARM/DebugConfig/
 firmware/MDK-ARM/RTE/
