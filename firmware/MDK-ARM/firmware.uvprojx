@@ -337,7 +337,7 @@
               <MiscControls />
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine />
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../RTSFR/Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -355,7 +355,7 @@
               <MiscControls />
               <Define />
               <Undefine />
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../RTSFR/Inc</IncludePath>
             </VariousControls>
           </Aads>
           <LDads>
@@ -550,6 +550,16 @@
               <FileName>port.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/portable/RVDS/ARM_CM3/port.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+                <Group>
+          <GroupName>RTSFR</GroupName>
+          <Files>
+            <File>
+              <FileName>rtsfr_detect.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../RTSFR/Src/rtsfr_detect.c</FilePath>
             </File>
           </Files>
         </Group>

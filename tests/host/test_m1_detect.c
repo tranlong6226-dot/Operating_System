@@ -10,8 +10,8 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "../../firmware/Middlewares/Third_Party/FreeRTOS/Source/include/rtsfr_types.h"
-#include "../../firmware/Middlewares/Third_Party/FreeRTOS/Source/include/rtsfr_detect.h"
+#include "../../firmware/RTSFR/Inc/rtsfr_types.h"
+#include "../../firmware/RTSFR/Inc/rtsfr_detect.h"
 
 /* Mock tick variable for host testing */
 TickType_t g_mock_tick = 0U;
