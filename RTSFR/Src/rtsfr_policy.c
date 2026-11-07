@@ -1,5 +1,6 @@
 #include "rtsfr_policy.h"
 
+#include <limits.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -161,6 +162,18 @@ rtsfr_status_t rtsfr_policy_set_task_state(uint8_t task_id,
     return RTSFR_OK;
 }
 
+bool rtsfr_policy_should_invoke_recovery(const rtsfr_decision_t *decision)
+{
+    if ((decision == NULL) || (decision->event_id == 0U))
+    {
+        return false;
+    }
+
+    return (decision->action == RTSFR_ACT_RESTART) ||
+           (decision->action == RTSFR_ACT_SAFE_MODE) ||
+           (decision->action == RTSFR_ACT_REQUEST_RESET);
+}
+
 rtsfr_severity_t rtsfr_policy_classify_severity(
     const rtsfr_fault_event_t *fault,
     const rtsfr_resource_summary_t *resource,
@@ -219,6 +232,7 @@ rtsfr_decision_t rtsfr_policy_evaluate(const rtsfr_fault_event_t *fault,
 
     /* ======================================================================
      * CỔNG 1: KIỂM TRA HỢP LỆ ĐẦU VÀO & CHỐNG SỰ KIỆN CŨ / TRÙNG LẶP
+     * Đồng bộ với rtsfr_recovery_request(): event_id == 0U là không hợp lệ.
      * ====================================================================== */
     if (fault == NULL)
     {
@@ -228,7 +242,8 @@ rtsfr_decision_t rtsfr_policy_evaluate(const rtsfr_fault_event_t *fault,
     }
 
     entry = prv_get_task_entry(fault->task_id);
-    if ((entry == NULL) || (!entry->registered) || (resource == NULL) ||
+    if ((entry == NULL) || (!entry->registered) ||
+        (fault->event_id == 0U) || (resource == NULL) ||
         (resource->task_id != fault->task_id))
     {
         return prv_make_decision(fault->event_id,
@@ -342,10 +357,12 @@ rtsfr_decision_t rtsfr_policy_evaluate(const rtsfr_fault_event_t *fault,
 
     /* ======================================================================
      * CỔNG 4: KIỂM TRA NGÂN SÁCH THỬ LẠI (RETRY BUDGET WINDOW - F07 / TC07)
+     * Đồng thời chặn tràn số generation == UINT16_MAX theo rtsfr_recovery.c
      * ====================================================================== */
     prv_refresh_retry_window(entry, fault->observed_tick);
 
-    if (entry->retry_count >= entry->max_restarts)
+    if ((entry->retry_count >= entry->max_restarts) ||
+        (entry->active_generation == UINT16_MAX))
     {
         if (entry->criticality == RTSFR_CRIT_HIGH)
         {
@@ -536,6 +553,19 @@ void rtsfr_policy_on_recovery_result(const rtsfr_recovery_result_t *result)
             entry->active_generation++;
         }
         entry->state = RTSFR_TASK_HEALTHY;
+        return;
+    }
+
+    /*
+     * Trong rtsfr_recovery.c của Tú, RTSFR_RECOVERY_REJECTED có thể do:
+     * 1) RTSFR_REASON_FALSE_ALARM_ROLLBACK (task được vTaskResume, vẫn HEALTHY)
+     * 2) RTSFR_REASON_SELF_RECOVERY_FORBIDDEN (enter_safe_mode = true -> SAFE_MODE)
+     */
+    if ((result->outcome == RTSFR_RECOVERY_REJECTED) &&
+        (result->reason_code == (uint16_t)RTSFR_REASON_SELF_RECOVERY_FORBIDDEN))
+    {
+        entry->state            = RTSFR_TASK_SAFE_MODE;
+        entry->last_reason_code = (uint16_t)RTSFR_POL_REASON_RECOVERY_FAILED;
         return;
     }
 
