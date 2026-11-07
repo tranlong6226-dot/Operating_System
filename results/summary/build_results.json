@@ -1,0 +1,38 @@
+[
+  {
+    "profile": "M5_DEBUG_TEST",
+    "status": "BUILD_PASS",
+    "hardware_status": "NOT_RUN",
+    "compiler": "Product: MDK-ARM Lite 5.43\nComponent: Arm Compiler for Embedded 6.24\nTool: armclang [5f371800]\n\nTarget: unspecified-arm-none-none",
+    "optimization": "-Oz",
+    "sizes": {
+      "flash_bytes": 17024,
+      "ram_bytes": 14584
+    },
+    "note": "CLI linker/build flags are documented; do not compare to different Keil settings as equivalent measurements."
+  },
+  {
+    "profile": "M5_RELEASE",
+    "status": "BUILD_PASS",
+    "hardware_status": "NOT_RUN",
+    "compiler": "Product: MDK-ARM Lite 5.43\nComponent: Arm Compiler for Embedded 6.24\nTool: armclang [5f371800]\n\nTarget: unspecified-arm-none-none",
+    "optimization": "-Oz",
+    "sizes": {
+      "flash_bytes": 16664,
+      "ram_bytes": 14560
+    },
+    "note": "CLI linker/build flags are documented; do not compare to different Keil settings as equivalent measurements."
+  },
+  {
+    "profile": "M5_BENCHMARK",
+    "status": "BUILD_PASS",
+    "hardware_status": "NOT_RUN",
+    "compiler": "Product: MDK-ARM Lite 5.43\nComponent: Arm Compiler for Embedded 6.24\nTool: armclang [5f371800]\n\nTarget: unspecified-arm-none-none",
+    "optimization": "-Oz",
+    "sizes": {
+      "flash_bytes": 17108,
+      "ram_bytes": 14584
+    },
+    "note": "CLI linker/build flags are documented; do not compare to different Keil settings as equivalent measurements."
+  }
+]

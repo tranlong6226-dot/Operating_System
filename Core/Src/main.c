@@ -22,6 +22,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "rtsfr_m5_config.h"
+#include "m5_command.h"
+#include "iwdg.h"
 #if (configRTSFR_M4_TARGET_TEST == 1)
 #include "test_m4.h"
 #endif
@@ -50,7 +53,7 @@ UART_HandleTypeDef huart1;
 osThreadId_t bootstrapTaskHandle;
 const osThreadAttr_t bootstrapTask_attributes = {
   .name = "bootstrapTask",
-  .stack_size = 128 * 4,
+  .stack_size = (configRTSFR_M5_ENABLE ? 512 : 128) * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -103,6 +106,9 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+#if configRTSFR_M5_ENABLE
+  rtsfr_iwdg_capture_reset_cause();
+#endif
 
   /* USER CODE END 2 */
 
@@ -273,6 +279,9 @@ void StartBootstrapTask(void *argument)
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   (void)argument;
+#if configRTSFR_M5_ENABLE
+  rtsfr_m5_service_init();
+#endif
 
 #if (configRTSFR_M4_TARGET_TEST == 1)
   rtsfr_m4_target_test_run();
@@ -283,7 +292,15 @@ void StartBootstrapTask(void *argument)
     HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port,
                        STATUS_LED_Pin);
 
+    /* M5 handles UART outside kernel hooks and blocks between polls. */
+#if configRTSFR_M5_ENABLE
+    for (unsigned int m5_poll = 0U; m5_poll < 250U; ++m5_poll) {
+      rtsfr_m5_service_poll();
+      osDelay(2);
+    }
+#else
     osDelay(500);
+#endif
   }
   /* USER CODE END 5 */
 }

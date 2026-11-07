@@ -1,0 +1,37 @@
+[
+  {
+    "suite": "trace",
+    "status": "HOST_PASS",
+    "hardware_status": "NOT_RUN"
+  },
+  {
+    "suite": "verify",
+    "status": "HOST_PASS",
+    "hardware_status": "NOT_RUN"
+  },
+  {
+    "suite": "health_gate",
+    "status": "HOST_PASS",
+    "hardware_status": "NOT_RUN"
+  },
+  {
+    "suite": "recovery_contract",
+    "status": "HOST_PASS",
+    "hardware_status": "NOT_RUN"
+  },
+  {
+    "suite": "faults_test",
+    "status": "HOST_PASS",
+    "hardware_status": "NOT_RUN"
+  },
+  {
+    "suite": "faults_release",
+    "status": "HOST_PASS",
+    "hardware_status": "NOT_RUN"
+  },
+  {
+    "suite": "python_tools",
+    "status": "HOST_PASS",
+    "hardware_status": "NOT_RUN"
+  }
+]

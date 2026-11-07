@@ -149,6 +149,14 @@ standard names. */
 #define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 0
 
 /* USER CODE BEGIN Defines */
+#include "rtsfr_m5_config.h"
+/* RTSFR M5: bounded lifecycle observation inside the kernel's real paths.
+ * No TCB dereference outside tasks.c, no UART or allocation in hooks. */
+#if configRTSFR_M5_ENABLE
+void rtsfr_m5_lifecycle(void *handle, unsigned int created);
+#define traceTASK_CREATE(pxNewTCB) rtsfr_m5_lifecycle((void *)(pxNewTCB), 1U)
+#define traceTASK_DELETE(pxTCB) rtsfr_m5_lifecycle((void *)(pxTCB), 0U)
+#endif
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
 #define configRTSFR_ENABLE                       1
 #define configRTSFR_MAX_TASKS                    3U

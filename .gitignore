@@ -1,0 +1,5 @@
+# M5 generated builds, caches and machine-specific editor state
+build/
+__pycache__/
+*.pyc
+.venv/
