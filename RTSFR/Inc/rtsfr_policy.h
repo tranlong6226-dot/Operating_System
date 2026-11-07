@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 /* ==========================================================================
- * 1. CẤU HÌNH THỜI GIAN CỬA SỐ RETRY TÍNH THEO TICKS
+ * 1. CẤU HÌNH THỜI GIAN CỬA SỔ RETRY TÍNH THEO TICKS
  * ========================================================================== */
 #ifndef configRTSFR_RETRY_WINDOW_TICKS
 #ifdef pdMS_TO_TICKS
@@ -93,6 +93,14 @@ rtsfr_status_t rtsfr_policy_set_task_state(uint8_t task_id,
  */
 rtsfr_decision_t rtsfr_policy_evaluate(const rtsfr_fault_event_t *fault,
                                        const rtsfr_resource_summary_t *resource);
+
+/*
+ * Kiểm tra xem quyết định từ M2 có cần chuyển tiếp sang hàm
+ * rtsfr_recovery_request() của Module 4 (Tú) hay không.
+ * Trả về true khi action thuộc: RESTART, SAFE_MODE, REQUEST_RESET.
+ * Trả về false khi action thuộc: IGNORE, OBSERVE, DEFER.
+ */
+bool rtsfr_policy_should_invoke_recovery(const rtsfr_decision_t *decision);
 
 /*
  * Phân loại mức độ nghiêm trọng (Severity) từ loại lỗi và bản chụp tài nguyên.
