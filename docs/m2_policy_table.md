@@ -1,4 +1,4 @@
-# Module 2: Fault Classification & Recovery Policy
+ # Module 2: Fault Classification & Recovery Policy
 
 ## 1. Nguyên tắc thiết kế Chính sách (Policy Design Principles)
 
