@@ -1,4 +1,4 @@
-# HƯỚNG DẪN TÍCH HỢP M1–M2–M3–M4 TRÊN KEIL C, BIÊN BẢN TEST TC06/TC07 & KỊCH BẢN BẢO VỆ ĐỒ ÁN
+# HƯỚNG DẪN TÍCH HỢP M1–M2–M3–M4 TRÊN KEIL C, BIÊN BẢN TEST TC06/TC07 & KỊCH BẢN BẢO VỆ BTL
 
 > **Module:** Module 2 — Fault Classification & Recovery Policy  
 > **Thành viên phụ trách:** Đinh Vũ Long  
