@@ -114,24 +114,4 @@ Owner: Vũ Long (M2) + Tú (M4)
 
 ---
 
-## 4. Kịch bản Thuyết trình 2 phút & Câu hỏi Vấn đáp trước Giảng viên cho Vũ Long (Mục 14 Phân công)
 
-### 4.1. Kịch bản nói 2 phút của Vũ Long (Mục 14 — Thứ tự trình bày số 3)
-> *"Thưa thầy/cô, em là Đinh Vũ Long, phụ trách **Module 2 — Phân loại lỗi và Chính sách phục hồi (Fault Classification & Recovery Policy)**.*
->
-> *Trong hệ thống RTSFR, nếu chúng ta chỉ phát hiện task treo rồi xóa đi tạo lại một cách máy móc như phiên bản V1, hệ thống sẽ gặp nguy cơ hỏng dữ liệu dùng chung hoặc rơi vào vòng lặp khởi động lại vô tận. Vì vậy, Module 2 của em được thiết kế theo nguyên lý tách biệt giữa **Policy (Chính sách)** và **Mechanism (Cơ chế)**.*
->
-> *Cụ thể, hàm `rtsfr_policy_evaluate()` của em hoạt động như một hàm tất định đi qua **6 cổng kiểm tra an toàn tuần tự**:*
-> *1. **Chống sự kiện cũ và trùng lặp:** Kiểm tra số thế hệ `generation` và `event_id` để đảm bảo một sự kiện lỗi của thế hệ cũ không bao giờ làm khởi động lại nhầm thế hệ mới vừa phục hồi.*
-> *2. **Lọc lỗi mức Kernel/Phần cứng và chờ hợp lệ:** Nếu gặp lỗi không thể tin cậy như tràn Stack hay Kernel Panic thì yêu cầu `REQUEST_RESET` ngay; nếu task đang chờ hợp lệ (`Expected Wait`) thì trả về `IGNORE` để chống báo động giả.*
-> *3. **Quản lý ngân sách thử lại (Retry Budget) theo cửa sổ trượt:** Mặc định mỗi task chỉ được phép `RESTART` tối đa 2 lần trong cửa sổ 60 giây (xử lý bằng phép trừ không dấu để chống tràn bộ đếm Tick 32-bit). Ở lần lỗi thứ 3 trong cửa sổ (`TC07`), Module 2 sẽ chặn `RESTART` và đưa về `SAFE_MODE`.*
-> *4. **Cổng an toàn tài nguyên (Resource Safety Gate):** Dựa trên bản chụp tài nguyên từ Module 3, nếu task đang giữ bất kỳ khóa `Mutex` nào (`TC06`), có I/O đang truyền dở, hoặc tài nguyên không thể thu hồi sạch (`can_reclaim_all == false`), Module 2 **tuyệt đối cấm `RESTART`** và chuyển hệ thống về `SAFE_MODE` kèm mã lý do `reason_code` tường minh.*
-> *5. Chỉ khi vượt qua toàn bộ các cổng an toàn trên, Module 2 mới cấp quyền `RTSFR_ACT_RESTART` sang cho Module 4 thực thi."*
-
-### 4.2. Bộ 3 câu hỏi Giảng viên hay hỏi nhất ở Module 2 & Cách trả lời ghi điểm
-* **Câu hỏi 1:** *"Tại sao khi một task bị treo lúc đang giữ Mutex (`TC06`), em không cho hệ thống tự mở khóa (`give/unlock`) Mutex đó rồi `RESTART` task luôn cho tiện, mà lại phải chuyển sang `SAFE_MODE`?"*
-  * **Trả lời:** Thưa thầy/cô, mục đích của Mutex là bảo vệ một vùng dữ liệu dùng chung (Critical Section). Khi một task đang giữ Mutex mà bị lỗi treo, rất có thể nó đang ghi/sửa cấu trúc dữ liệu dùng chung đó dở dang. Nếu hệ thống cưỡng bức mở khóa Mutex cho task khác vào đọc, task khác sẽ đọc phải dữ liệu hỏng (inconsistent state). Vì trên vi điều khiển không có cơ chế giao dịch hoàn nguyên bộ nhớ (transactional memory rollback), việc từ chối `RESTART` và đưa về `SAFE_MODE` là cách duy nhất đảm bảo tính đúng đắn của hệ thống.
-* **Câu hỏi 2:** *"Làm sao Module 2 của em biết được khi nào hết 60 giây của cửa sổ Retry nếu biến đếm `TickType_t` của FreeRTOS chạy lâu ngày bị tràn qua 0 (wrap-around)?"*
-  * **Trả lời:** Em không dùng phép cộng `window_start_tick + 60000` để so sánh vì phép cộng sẽ bị sai khi tràn số. Thay vào đó, em dùng phép trừ hai số nguyên không dấu: `(TickType_t)(detected_tick - window_start_tick) >= retry_window_ticks`. Trong số học bù 2 không dấu của C, phép trừ này luôn cho khoảng thời gian trôi qua chính xác ngay cả khi `detected_tick` vừa tràn qua 0 (đã được em chứng minh trong bài kiểm thử `UT17`).
-* **Câu hỏi 3:** *"Nếu Module 4 đang xóa và tạo lại một task mà Module 1 lại quét và gửi thêm một báo cáo lỗi của task đó tới thì Module 2 xử lý thế nào?"*
-  * **Trả lời:** Em chặn ở hai lớp: thứ nhất, nếu cùng `event_id` thì Cổng 1 trả về `RTSFR_ACT_IGNORE` (`DUPLICATE_EVENT`); thứ hai, nếu khác `event_id` nhưng trạng thái task trong Module 2 đang là `QUIESCING/CLEANUP/RECREATE/VERIFYING` thì Cổng 3 trả về `RTSFR_ACT_DEFER` (`RECOVERY_IN_PROGRESS`) nên không bao giờ kích hoạt hai luồng phục hồi chồng chéo nhau.
