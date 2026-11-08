@@ -79,9 +79,9 @@ typedef enum {
  */
 typedef struct {
     uint8_t         task_id;         /* Static logical task ID (0..MAX-1) */
+    uint8_t         criticality;     /* 0: LOW, 1: MEDIUM, 2: HIGH (CRITICAL) */
     const char     *task_name;       /* Task name string for debugging */
     TickType_t      timeout_ticks;   /* Maximum allowed ticks without progress */
-    uint8_t         criticality;     /* 0: LOW, 1: MEDIUM, 2: HIGH (CRITICAL) */
 } rtsfr_task_config_t;
 
 /**

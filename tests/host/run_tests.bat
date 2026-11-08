@@ -15,5 +15,5 @@ if %ERRORLEVEL% equ 0 (
     set TEST_EXIT=1
 )
 
-if "%~1"=="--pause" pause
+pause
 exit /b %TEST_EXIT%
