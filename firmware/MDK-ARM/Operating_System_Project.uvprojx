@@ -45,14 +45,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>Operating_System_Project\</OutputDirectory>
+          <OutputDirectory>../../build/keil_Operating_System_Project/</OutputDirectory>
           <OutputName>Operating_System_Project</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath />
+          <ListingPath>../../build/keil_Operating_System_Project/</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -756,14 +756,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>../build/keil_M5_DEBUG_TEST/</OutputDirectory>
+          <OutputDirectory>../../build/keil_M5_DEBUG_TEST/</OutputDirectory>
           <OutputName>M5_DEBUG_TEST</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath />
+          <ListingPath>../../build/keil_M5_DEBUG_TEST/</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -1467,14 +1467,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>../build/keil_M5_RELEASE/</OutputDirectory>
+          <OutputDirectory>../../build/keil_M5_RELEASE/</OutputDirectory>
           <OutputName>M5_RELEASE</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath />
+          <ListingPath>../../build/keil_M5_RELEASE/</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -2178,14 +2178,14 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>../build/keil_M5_BENCHMARK/</OutputDirectory>
+          <OutputDirectory>../../build/keil_M5_BENCHMARK/</OutputDirectory>
           <OutputName>M5_BENCHMARK</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath />
+          <ListingPath>../../build/keil_M5_BENCHMARK/</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>

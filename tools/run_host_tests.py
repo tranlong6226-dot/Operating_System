@@ -26,16 +26,16 @@ def main():
             sys.exit(proc.returncode)
     output = ROOT / 'build/host'
     output.mkdir(parents=True, exist_ok=True)
-    inc = ['tests/host/stubs', 'RTSFR/Inc', 'App', 'tests/target']
-    trace = ['RTSFR/Src/rtsfr_trace.c']
-    adapter = ['RTSFR/Src/rtsfr_m5_adapter.c', 'RTSFR/Src/rtsfr_verify.c', 'RTSFR/Src/rtsfr_health.c']
+    inc = ['tests/host/stubs', 'firmware/RTSFR/Inc', 'firmware/App', 'firmware/tests/target']
+    trace = ['firmware/RTSFR/Src/rtsfr_trace.c']
+    adapter = ['firmware/RTSFR/Src/rtsfr_m5_adapter.c', 'firmware/RTSFR/Src/rtsfr_verify.c', 'firmware/RTSFR/Src/rtsfr_health.c']
     cases = [
         ('trace', 'tests/host/test_trace.c', trace, 1),
-        ('verify', 'tests/host/test_verify.c', trace + ['RTSFR/Src/rtsfr_verify.c'], 1),
-        ('health_gate', 'tests/host/test_health_gate.c', ['RTSFR/Src/rtsfr_health.c'], 1),
-        ('recovery_contract', 'tests/host/test_recovery_contract.c', trace + adapter + ['RTSFR/Src/rtsfr_recovery.c', 'RTSFR/Src/rtsfr_safe_mode.c'], 1),
-        ('faults_test', 'tests/host/test_faults.c', trace + adapter + ['App/fault_scenarios.c', 'tests/target/m5_test_runner.c'], 1),
-        ('faults_release', 'tests/host/test_faults.c', trace + adapter + ['App/fault_scenarios.c', 'tests/target/m5_test_runner.c'], 0),
+        ('verify', 'tests/host/test_verify.c', trace + ['firmware/RTSFR/Src/rtsfr_verify.c'], 1),
+        ('health_gate', 'tests/host/test_health_gate.c', ['firmware/RTSFR/Src/rtsfr_health.c'], 1),
+        ('recovery_contract', 'tests/host/test_recovery_contract.c', trace + adapter + ['firmware/RTSFR/Src/rtsfr_recovery.c', 'firmware/RTSFR/Src/rtsfr_safe_mode.c'], 1),
+        ('faults_test', 'tests/host/test_faults.c', trace + adapter + ['firmware/App/fault_scenarios.c', 'firmware/tests/target/m5_test_runner.c'], 1),
+        ('faults_release', 'tests/host/test_faults.c', trace + adapter + ['firmware/App/fault_scenarios.c', 'firmware/tests/target/m5_test_runner.c'], 0),
     ]
     results = []
     for name, test, sources, test_build in cases:

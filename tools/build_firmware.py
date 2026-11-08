@@ -34,7 +34,7 @@ def main():
             if artifacts.exists():
                 shutil.copytree(artifacts, ROOT / 'build' / args.profile, dirs_exist_ok=True)
             sys.exit(proc.returncode)
-    project_dir = ROOT / 'MDK-ARM'
+    project_dir = ROOT / 'firmware/MDK-ARM'
     tree = ET.parse(project_dir / 'Operating_System_Project.uvprojx')
     target = next(t for t in tree.findall('./Targets/Target') if t.findtext('TargetName') == args.profile)
     controls = target.find('./TargetOption/TargetArmAds/Cads/VariousControls')

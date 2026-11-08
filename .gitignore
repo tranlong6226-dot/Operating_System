@@ -3,3 +3,16 @@ build/
 __pycache__/
 *.pyc
 .venv/
+
+# Keil outputs and per-user window state (shared .uvprojx/.uvoptx stay tracked)
+firmware/MDK-ARM/Operating_System_Project/
+firmware/MDK-ARM/*.log
+*.uvguix.*
+*.o
+*.obj
+*.d
+*.axf
+*.hex
+*.map
+*.lnp
+*.dep

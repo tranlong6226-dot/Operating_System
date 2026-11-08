@@ -2,6 +2,12 @@
 
 Bài tập lớn Hệ điều hành 2026.1, FreeRTOS trên STM32F103. Phần M5 (Thủy): fault injection, trace, verification, watchdog và công cụ kiểm thử.
 
+## Cấu trúc thư mục
+
+Mã nhúng nằm trong [firmware/](firmware/README.md), gồm Core, Drivers, Middlewares, RTSFR, App, board, test target và project Keil/CubeMX. `tests/host/`, `tools/`, `docs/` và `results/` giữ ở root repo. File sinh tự động nằm trong `build/` và bị bỏ qua bởi Git.
+
+Xem [cây thư mục và hướng dẫn chuyển cấu trúc](docs/repository_layout.md). Mở Keil tại `firmware/MDK-ARM/Operating_System_Project.uvprojx`, CubeMX tại `firmware/Operating_System_Project.ioc`.
+
 ## Bắt đầu
 
 - [Tổng quan phần M5](docs/m5_overview.md)
@@ -16,6 +22,7 @@ Bài tập lớn Hệ điều hành 2026.1, FreeRTOS trên STM32F103. Phần M5 
 Mặc định firmware mang nhãn **M5_ONLY**. M1–M3 chưa có implementation trong snapshot repo ban đầu; không có provider thật thì M5 trả NOT_READY. Kết quả STM32 và benchmark V0/V1/V2 hiện **NOT_RUN**. Các file fixtures là dữ liệu tự tạo cho unit test.
 
 ```powershell
+python tools/check_layout.py
 python tools/run_host_tests.py
 python tools/build_firmware.py --profile M5_DEBUG_TEST --compiler-dir "<KEIL_ARMCLANG_BIN>"
 ```

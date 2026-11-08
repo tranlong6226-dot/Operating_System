@@ -13,13 +13,13 @@ M5 cung cấp tạo lỗi có kiểm soát, trace, kiểm tra bất biến, watc
 
 ## Đọc theo thứ tự
 
-1. `App/fault_scenarios.c`: arm lỗi cho đúng task/generation; task gọi checkpoint tại vị trí phù hợp.
-2. `RTSFR/Src/rtsfr_trace.c`: ghi sự kiện vào ring hữu hạn; không UART, malloc hay chờ trong hook.
-3. `RTSFR/Src/rtsfr_verify.c`: kiểm tra snapshot nhất quán do module owners cung cấp.
-4. `RTSFR/Src/rtsfr_health.c`: xác thực bằng chứng sức khỏe và supervisor identity.
-5. `board/iwdg.c`: một owner được refresh sau health gate.
-6. `App/m5_command.c`: nhận lệnh, điều phối và xuất log từ bootstrap task.
-7. `tests/target/m5_test_runner.c`: chỉ phát PASS/FAIL khi implementation test thật báo hoàn tất.
+1. `firmware/App/fault_scenarios.c`: arm lỗi cho đúng task/generation; task gọi checkpoint tại vị trí phù hợp.
+2. `firmware/RTSFR/Src/rtsfr_trace.c`: ghi sự kiện vào ring hữu hạn; không UART, malloc hay chờ trong hook.
+3. `firmware/RTSFR/Src/rtsfr_verify.c`: kiểm tra snapshot nhất quán do module owners cung cấp.
+4. `firmware/RTSFR/Src/rtsfr_health.c`: xác thực bằng chứng sức khỏe và supervisor identity.
+5. `firmware/board/iwdg.c`: một owner được refresh sau health gate.
+6. `firmware/App/m5_command.c`: nhận lệnh, điều phối và xuất log từ bootstrap task.
+7. `firmware/tests/target/m5_test_runner.c`: chỉ phát PASS/FAIL khi implementation test thật báo hoàn tất.
 
 ## Luồng
 

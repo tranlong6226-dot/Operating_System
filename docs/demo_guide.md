@@ -13,9 +13,9 @@ python tools/build_firmware.py --profile M5_BENCHMARK --compiler-dir "C:\Users\t
 
 Đổi compiler-dir theo máy; không giả định Keil đã cài trên mọi máy. Output trong build/<PROFILE>: firmware.axf, firmware.hex, firmware.map, build.log, build_summary.json. CLI không flash. Script dùng scratch ASCII nếu đường dẫn repo có tiếng Việt vì công cụ legacy có thể không hỗ trợ Unicode.
 
-Có thể mở MDK-ARM/Operating_System_Project.uvprojx bằng Keil, chọn target tương ứng rồi Build/Rebuild. Build bằng UI cần device pack/CMSIS pack tương ứng project; CLI sử dụng headers đã commit. Flags CLI được công bố riêng; không coi hai đường build là cùng số đo nếu chưa đối chiếu.
+Có thể mở firmware/MDK-ARM/Operating_System_Project.uvprojx bằng Keil, chọn target tương ứng rồi Build/Rebuild. Build bằng UI cần device pack/CMSIS pack tương ứng project; CLI sử dụng headers đã commit. Flags CLI được công bố riêng; không coi hai đường build là cùng số đo nếu chưa đối chiếu.
 
-Project clone có tham chiếu tests/target/test_m4.c nhưng không có file đó. Tham chiếu được giữ và đánh dấu exclude trong project; không tạo file M4 test giả. Các file M4 hiện có giữ nguyên nội dung. Test hợp đồng M4 trên host do M5 cung cấp ở tests/host/test_recovery_contract.c.
+Project clone có tham chiếu firmware/tests/target/test_m4.c nhưng không có file đó. Tham chiếu được giữ và đánh dấu exclude trong project; không tạo file M4 test giả. Các file M4 hiện có giữ nguyên nội dung. Test hợp đồng M4 trên host do M5 cung cấp ở tests/host/test_recovery_contract.c.
 
 ## Kết nối
 
