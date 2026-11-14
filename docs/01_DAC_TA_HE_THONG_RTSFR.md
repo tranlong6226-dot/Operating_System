@@ -572,47 +572,26 @@ Không được đo overhead bằng cách `printf()` từng event trong đườn
 
 ```text
 rtsfr-project/
-├── README.md
 ├── docs/
-│   ├── 01_system_spec.md
-│   ├── 02_team_plan.md
-│   ├── architecture.md
-│   ├── interfaces.md
-│   ├── fault_model.md
-│   ├── experiment_protocol.md
-│   └── results/
+│   ├── 01_DAC_TA_HE_THONG_RTSFR.md
+│   ├── 02_PHAN_CONG_CONG_VIEC_VA_QUY_UOC_NHOM.md
+│   └── ...                    # hướng dẫn, kế hoạch và ma trận tuân thủ
 ├── firmware/
+│   ├── Operating_System_Project.ioc
+│   ├── .mxproject
 │   ├── Core/                  # CubeMX HAL, startup, UART, GPIO
 │   ├── Drivers/
-│   ├── FreeRTOS-Kernel/       # frozen upstream + kernel patch
-│   │   ├── tasks.c            # M1/M4 integration hooks
-│   │   ├── queue.c            # M3 mutex lifecycle hooks
-│   │   ├── include/
-│   │   │   ├── rtsfr_api.h
-│   │   │   └── rtsfr_internal.h
-│   │   └── rtsfr/
-│   │       ├── rtsfr_detect.c        # M1
-│   │       ├── rtsfr_policy.c        # M2
-│   │       ├── rtsfr_resource.c      # M3
-│   │       ├── rtsfr_recovery.c      # M4
-│   │       ├── rtsfr_verify.c        # M5
-│   │       └── rtsfr_trace.c         # M5
-│   ├── App/
-│   │   ├── demo_tasks.c
-│   │   └── fault_scenarios.c
+│   ├── Middlewares/            # FreeRTOS kernel và CMSIS-RTOS
+│   ├── RTSFR/                  # detection, policy, resource, recovery, trace
+│   ├── App/                    # fault injection và UART command service
 │   ├── board/                 # IWDG/UART integration
-│   └── project_keil/         # uVision project / build config
-├── tests/
-│   ├── host/                  # pure policy/state machine tests
-│   ├── target/                # integration test scenarios
-│   └── fixtures/
-├── tools/
-│   └── collect_log.py
-├── results/
-│   ├── raw/
-│   └── summary/
-└── .github/
-    └── pull_request_template.md
+│   ├── tests/target/          # integration test chạy trên STM32
+│   └── MDK-ARM/              # uVision project và build output
+└── experiment/
+    ├── tools/                 # terminal và bộ phân tích log trên PC
+    ├── logs/raw/              # log UART thô
+    ├── results/               # dữ liệu thí nghiệm
+    └── reports/               # báo cáo tổng hợp
 ```
 
 Không copy nhiều bản FreeRTOS khác nhau vào mỗi module. Nếu CubeMX generate lại code, phải kiểm tra xung đột giữa phần Middlewares mặc định và bản kernel đã fork; duy trì **một nguồn kernel chính thức** trong build.
@@ -721,3 +700,78 @@ Một bản hoàn chỉnh cần có:
 11. FreeRTOS dependability / targeted fault injection (2026): https://arxiv.org/abs/2603.25666
 
 > **Tính mới kỳ vọng:** Không tuyên bố RTSFR là SOTA hoặc cơ chế lần đầu xuất hiện. Nhóm nghiên cứu và đo **resource-aware selective recovery** với giới hạn tài nguyên MCU, so sánh baseline restart đơn giản; bài báo tham khảo dùng để xác định bài toán, fault model và cách đánh giá.
+
+---
+
+## 15. Phụ lục A — Đối chiếu đặc tả với hệ thống tích hợp
+
+Phụ lục này phân biệt giữa chức năng **đã có trong mã nguồn/build** và bằng
+chứng **đã được thu từ runtime trên board**. Không đánh dấu một test PASS nếu
+chưa có log target tương ứng.
+
+### 15.1. Phạm vi chức năng
+
+| Yêu cầu | Hiện trạng | Bằng chứng hoặc việc còn lại |
+|---|---|---|
+| M1 phát hiện no-progress, self-report, expected wait | Đã triển khai | `rtsfr_detect.c`; test TC02–TC04 |
+| Generation và chống stale event | Đã triển khai | TC10 trong target runner |
+| Event queue bounded, overflow không mất im lặng | Đã triển khai | Counter, SAFE_MODE và TC13 |
+| M2 policy deterministic, retry window | Đã triển khai | TC07 kiểm tra retry exhaustion |
+| Không restart khi mutex/unknown/in-flight | Đã triển khai | TC06; `unsafe_restarts_prevented` |
+| M3 hook mutex trong `queue.c` | Đã triển khai | Hook sau take/give thành công |
+| Managed buffer có cleanup contract | Đã triển khai | TC05 và TC14 |
+| M4 quiesce → revalidate → cleanup → recreate → verify | Đã triển khai | Generation mới và first-progress gate |
+| Chờ Idle Task cleanup TCB/stack | Đã triển khai | Chờ số task pending cleanup về baseline |
+| Ép lỗi tạo task | Đã triển khai | Recovery create hook và TC08 |
+| M5 trace, invariant checker, health gate | Đã triển khai | `status`, `verify`, trace ring |
+| IWDG health-gated refresh và reset cause | Đã bật | `RTSFR_IWDG_CONFIG_CONFIRMED=1`; D05 dùng reset thật |
+| F09 stack overflow/HardFault | Giới hạn đúng đặc tả | Không selective-restart; để watchdog reset |
+
+### 15.2. Test matrix
+
+| Test | Mục tiêu | Target runner |
+|---|---|---|
+| TC01 | Normal operation | Có |
+| TC02 | Stop progress và selective restart | Có |
+| TC03 | Busy loop, tick còn chạy | Có |
+| TC04 | Expected wait | Có |
+| TC05 | Managed buffer cleanup | Có |
+| TC06 | Mutex dẫn tới SAFE_MODE | Có |
+| TC07 | Retry exhaustion | Có |
+| TC08 | Forced create failure | Có |
+| TC09 | False-alarm rollback | Có |
+| TC10 | Stale generation | Có |
+| TC11 | Recovery lặp lại và heap stability | Có |
+| TC12 | IWDG fallback | Có, xác nhận ở lần boot sau |
+| TC13 | Event saturation | Có |
+| TC14 | Ownership invariant stress | Có |
+
+TC12 chỉ PASS ở lần boot sau nếu reset cause là IWDG và backup marker hợp lệ.
+TC06, TC07, TC08 và TC13 có thể latch SAFE_MODE nên phải reset trước test kế tiếp.
+
+### 15.3. Metrics quan sát được
+
+Lệnh `status` cung cấp progress, generation, stack high-water mark, free heap,
+minimum-ever-free-heap, số vòng/cycles monitor, event overflow, resource anomaly,
+successful recovery, unsafe restart prevented và false-alarm rollback.
+
+`experiment/tools/rtsfr_log_analyzer.py` đọc log UART CSV và tổng hợp PASS/FAIL,
+detection latency, recovery latency, trace drop, minimum heap và max monitor cycles.
+
+### 15.4. Bằng chứng thực nghiệm còn cần hoàn thiện
+
+1. Lưu raw log độc lập cho toàn bộ TC01–TC14.
+2. Chạy V0/V1/V2 với cùng workload và đủ số lần lặp để tính median/p95.
+3. Lưu thông số timeout IWDG thực tế trên board.
+4. Đo stack high-water mark để tối ưu stack và heap.
+5. Thiết lập quản lý phiên bản/tag V0, V1 và V2 để chứng minh diff lịch sử.
+
+Các mục này là bằng chứng thực nghiệm hoặc quản lý phiên bản, không thể thay
+thế bằng việc firmware build thành công.
+
+### 15.5. Trạng thái build gần nhất
+
+- Toolchain: ArmClang 6.24 / MDK-ARM.
+- Kết quả sau tái cấu trúc thư mục: `0 Error(s), 0 Warning(s)`.
+- Kích thước: Code 40,260 bytes; RO 3,748; RW 60; ZI 16,068.
+- Log: `firmware/MDK-ARM/restructure_rebuild.log`.

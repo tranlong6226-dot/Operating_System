@@ -64,13 +64,15 @@
 #define configTICK_RATE_HZ                       ((TickType_t)1000)
 #define configMAX_PRIORITIES                     ( 56 )
 #define configMINIMAL_STACK_SIZE                 ((uint16_t)128)
-#define configTOTAL_HEAP_SIZE                    ((size_t)3072)
+#define configTOTAL_HEAP_SIZE                    ((size_t)8192)
 #define configMAX_TASK_NAME_LEN                  ( 16 )
 #define configUSE_TRACE_FACILITY                 1
 #define configUSE_16_BIT_TICKS                   0
 #define configUSE_MUTEXES                        1
 #define configQUEUE_REGISTRY_SIZE                8
+#define configCHECK_FOR_STACK_OVERFLOW           2
 #define configUSE_RECURSIVE_MUTEXES              1
+#define configUSE_MALLOC_FAILED_HOOK             1
 #define configUSE_COUNTING_SEMAPHORES            1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION  0
 
@@ -147,7 +149,23 @@ standard names. */
 #define USE_CUSTOM_SYSTICK_HANDLER_IMPLEMENTATION 0
 
 /* USER CODE BEGIN Defines */
+#include "rtsfr_m5_config.h"
+#if configRTSFR_M5_ENABLE
+void rtsfr_m5_lifecycle(void *handle, unsigned int created);
+#define traceTASK_CREATE(pxNewTCB) \
+  rtsfr_m5_lifecycle((void *)(pxNewTCB), 1U)
+#define traceTASK_DELETE(pxTCB) \
+  rtsfr_m5_lifecycle((void *)(pxTCB), 0U)
+#endif
 /* Section where parameter definitions can be added (for instance, to override default ones in FreeRTOS.h) */
+#define configRTSFR_ENABLE                       1
+#define configRTSFR_MAX_TASKS                    3U
+#define configRTSFR_MAX_TRACKED_TASKS            configRTSFR_MAX_TASKS
+#define configRTSFR_EVENT_QUEUE_SIZE             8U
+#define configRTSFR_MAX_TRACKED_MUTEXES          4U
+#define configRTSFR_MAX_MANAGED_BUFFERS          8U
+#define configRTSFR_M4_TARGET_TEST               0
+#define configRTSFR_M4_TEST_SCENARIO             1
 /* USER CODE END Defines */
 
 #endif /* FREERTOS_CONFIG_H */

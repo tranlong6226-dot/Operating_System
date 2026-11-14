@@ -3665,6 +3665,24 @@ static void prvCheckTasksWaitingTermination( void )
 }
 /*-----------------------------------------------------------*/
 
+#if ( configRTSFR_ENABLE == 1 ) && ( INCLUDE_vTaskDelete == 1 )
+
+	UBaseType_t uxTaskGetDeletedTasksWaitingCleanUp( void )
+	{
+		UBaseType_t uxPending;
+
+		taskENTER_CRITICAL();
+		{
+			uxPending = uxDeletedTasksWaitingCleanUp;
+		}
+		taskEXIT_CRITICAL();
+
+		return uxPending;
+	}
+
+#endif
+/*-----------------------------------------------------------*/
+
 #if( configUSE_TRACE_FACILITY == 1 )
 
 	void vTaskGetInfo( TaskHandle_t xTask, TaskStatus_t *pxTaskStatus, BaseType_t xGetFreeStackSpace, eTaskState eState )

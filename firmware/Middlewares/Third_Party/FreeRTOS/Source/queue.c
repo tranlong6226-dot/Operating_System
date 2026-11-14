@@ -37,6 +37,10 @@ task.h is included from an application file. */
 #include "task.h"
 #include "queue.h"
 
+#if ( configRTSFR_ENABLE == 1 )
+	#include "rtsfr_resource.h"
+#endif
+
 #if ( configUSE_CO_ROUTINES == 1 )
 	#include "croutine.h"
 #endif
@@ -1468,6 +1472,12 @@ Queue_t * const pxQueue = xQueue;
 						/* Record the information required to implement
 						priority inheritance should it become necessary. */
 						pxQueue->u.xSemaphore.xMutexHolder = pvTaskIncrementMutexHeldCount();
+						#if ( configRTSFR_ENABLE == 1 )
+						{
+							rtsfr_resource_hook_mutex_taken( pxQueue,
+								pxQueue->u.xSemaphore.xMutexHolder );
+						}
+						#endif
 					}
 					else
 					{
@@ -2088,6 +2098,12 @@ UBaseType_t uxMessagesWaiting;
 			{
 				/* The mutex is no longer being held. */
 				xReturn = xTaskPriorityDisinherit( pxQueue->u.xSemaphore.xMutexHolder );
+				#if ( configRTSFR_ENABLE == 1 )
+				{
+					rtsfr_resource_hook_mutex_given( pxQueue,
+						pxQueue->u.xSemaphore.xMutexHolder );
+				}
+				#endif
 				pxQueue->u.xSemaphore.xMutexHolder = NULL;
 			}
 			else
