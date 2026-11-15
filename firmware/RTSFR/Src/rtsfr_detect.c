@@ -309,6 +309,11 @@ void rtsfr_detect_on_new_generation(uint8_t task_id,
         return;
     }
     taskENTER_CRITICAL();
+    if (record->state == RTSFR_TASK_UNREGISTERED)
+    {
+        taskEXIT_CRITICAL();
+        return;
+    }
     record->generation = new_generation;
     record->task_handle = new_handle;
     record->last_progress_tick = xTaskGetTickCount();

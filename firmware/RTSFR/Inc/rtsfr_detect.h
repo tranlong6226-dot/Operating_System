@@ -6,6 +6,7 @@
 typedef struct
 {
     uint8_t task_id;
+    bool fault_pending;
     uint16_t generation;
     TaskHandle_t task_handle;
     TickType_t timeout_ticks;
@@ -13,7 +14,6 @@ typedef struct
     TickType_t expected_wait_deadline;
     uint32_t progress_seq;
     rtsfr_task_state_t state;
-    bool fault_pending;
 } rtsfr_task_record_t;
 
 rtsfr_status_t rtsfr_detect_init(void);

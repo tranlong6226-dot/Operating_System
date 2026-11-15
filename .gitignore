@@ -1,0 +1,136 @@
+# ==============================================================================
+# RTSFR (Resource-aware Task Selective Fault Recovery) .gitignore
+# Chi gom ma nguon, header, script cau hinh, tai lieu can thiet.
+# Loai bo toan bo file build, anh, file rac, file tam va cau hinh IDE ca nhan.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Hinh anh & Media (Images & Media files)
+# ------------------------------------------------------------------------------
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.ico
+*.tiff
+*.webp
+*.svg
+*.eps
+*.raw
+*.mp4
+*.avi
+*.mkv
+*.mov
+
+# ------------------------------------------------------------------------------
+# 2. File tai lieu trinh chieu, Office, ban nhap (Office & Presentation drafts)
+# ------------------------------------------------------------------------------
+*.pptx
+*.ppt
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pdf
+~$*
+
+# ------------------------------------------------------------------------------
+# 3. Keil MDK-ARM Build Outputs & Intermediate Files
+# ------------------------------------------------------------------------------
+*.o
+*.d
+*.crf
+*.axf
+*.build_log.htm
+*.dep
+*.map
+*.lst
+*.lnp
+*.htm
+*.log
+*.sbr
+*.browse
+*.i
+
+# Keil intermediate folders & user configs (ho tro ca thu muc root va firmware/)
+**/MDK-ARM/firmware/
+**/MDK-ARM/Operating_System_Project/
+**/MDK-ARM/*/
+**/DebugConfig/
+**/RTE/
+*.uvguix.*
+*.uvgui.*
+*.uvguix
+*.uvgui
+*.bak
+*.orig
+*.rej
+
+# ------------------------------------------------------------------------------
+# 4. STM32CubeIDE / GCC / MinGW Build Artifacts
+# ------------------------------------------------------------------------------
+Debug/
+Release/
+**/Debug/
+**/Release/
+*.elf
+*.bin
+*.hex
+*.su
+*.cyclo
+*.a
+*.lib
+*.out
+
+# ------------------------------------------------------------------------------
+# 5. Host Unit Test Binaries & Python Artifacts
+# ------------------------------------------------------------------------------
+*.exe
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ------------------------------------------------------------------------------
+# 6. File nen & Luu tru (Archives & Compression)
+# ------------------------------------------------------------------------------
+*.zip
+*.tar
+*.gz
+*.7z
+*.rar
+
+# ------------------------------------------------------------------------------
+# 7. IDE & Editor Configs (Chi giu cau hinh chung, bo ca nhan)
+# ------------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------------------------
+# 8. He dieu hanh (OS generated files)
+# ------------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# ------------------------------------------------------------------------------
+# 9. File tam, Ban giao ca nhan & AI Pair-Programming Local Files
+# ------------------------------------------------------------------------------
+scratch/
+temp/
+tmp/
+*.tmp
+*handover*
+AGENTS.md
