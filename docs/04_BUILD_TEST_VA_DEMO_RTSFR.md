@@ -458,8 +458,11 @@ Kiểm tra lại:
 1. FreeRTOS GCC/ARM_CM3 port còn trong project.
 2. `queue.c` còn các mutex hook RTSFR.
 3. `tasks.c` còn `uxTaskGetDeletedTasksWaitingCleanUp()`.
-4. USART1 IRQ còn gọi `rtsfr_m5_uart_irq()`.
-5. Các group RTSFR/App/board/tests còn trong project Keil.
+4. `tasks.c` còn tạo task `RTSFR-Kernel` trong `vTaskStartScheduler()`.
+5. `FreeRTOS.h` còn `RtsfrTaskMetadata_t` và `RtsfrQueueMetadata_t`.
+6. Keil project còn compile toàn bộ `Source/rtsfr/*.c`; `App/RTSFR` chỉ chứa adapter, không chứa bản core trùng lặp.
+7. USART1 IRQ còn gọi `rtsfr_m5_uart_irq()`.
+8. Các group RTSFR/App/board/tests còn trong project Keil.
 
 Không nạp file AXF cũ nếu build mới đang lỗi.
 

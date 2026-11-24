@@ -1,7 +1,7 @@
 operating_system_project/tasks.o: \
   ..\Middlewares\Third_Party\FreeRTOS\Source\tasks.c \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h ..\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Core\Inc\FreeRTOSConfig.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \
@@ -10,4 +10,9 @@ operating_system_project/tasks.o: \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\timers.h \
-  ..\Middlewares\Third_Party\FreeRTOS\Source\include\stack_macros.h
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\stack_macros.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_detect.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_kernel.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_recovery.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_safe_mode.h

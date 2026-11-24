@@ -1,8 +1,9 @@
 operating_system_project/rtsfr_safe_mode.o: \
-  ..\RTSFR\Src\rtsfr_safe_mode.c ..\RTSFR\Inc\rtsfr_safe_mode.h \
-  ..\RTSFR\Inc\rtsfr_types.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\rtsfr\rtsfr_safe_mode.c \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_safe_mode.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h ..\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Core\Inc\FreeRTOSConfig.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \

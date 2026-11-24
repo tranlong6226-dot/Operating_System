@@ -262,7 +262,7 @@ Thực thi quyết định từ M2 một cách **có thứ tự, an toàn và ki
 
 | ID | Công việc | Đầu ra cụ thể | Ưu tiên |
 |---|---|---|---|
-| M4-01 | Đọc `tasks.c`: create/delete, idle cleanup, static/dynamic task | Kết quả đã hợp nhất vào `firmware/RTSFR/Src/rtsfr_recovery.c` | P0 |
+| M4-01 | Đọc `tasks.c`: create/delete, idle cleanup, static/dynamic task | Kết quả đã hợp nhất vào `firmware/Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_recovery.c` | P0 |
 | M4-02 | Thiết kế recovery state machine với các transitions hợp lệ | `rtsfr_recovery_state_t` và transition table | P0 |
 | M4-03 | Thiết kế task descriptor immutable để recreate | Tạo instance mới từ config sạch; generation hợp lệ | P0 |
 | M4-04 | Phát triển baseline restart cho task không giữ resource | TC02 pass trước khi M3 hoàn thiện | P0 |
@@ -307,7 +307,7 @@ void rtsfr_recovery_on_first_progress(uint8_t task_id, uint16_t generation);
 
 ### 6.5. File sở hữu, nghiệm thu
 
-- `firmware/RTSFR/Src/rtsfr_recovery.c`, `firmware/RTSFR/Inc/rtsfr_recovery.h`, `rtsfr_safe_mode.c/.h`.
+- `firmware/Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_recovery.c`, `rtsfr_safe_mode.c` và các header core trong `FreeRTOS/Source/include`.
 - Review/merge mọi patch `tasks.c` để tránh xung đột, nhưng tác giả patch tự chịu chất lượng.
 - `firmware/tests/target/test_m4.c`.
 

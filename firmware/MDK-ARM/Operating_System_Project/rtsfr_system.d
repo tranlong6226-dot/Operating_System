@@ -1,7 +1,8 @@
-operating_system_project/rtsfr_system.o: ..\RTSFR\Src\rtsfr_system.c \
-  ..\RTSFR\Inc\rtsfr_system.h ..\RTSFR\Inc\rtsfr_types.h \
+operating_system_project/rtsfr_system.o: ..\App\RTSFR\Src\rtsfr_system.c \
+  ..\App\RTSFR\Inc\rtsfr_system.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h ..\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Core\Inc\FreeRTOSConfig.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \
@@ -32,10 +33,16 @@ operating_system_project/rtsfr_system.o: ..\RTSFR\Src\rtsfr_system.c \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
-  ..\tests\target\m5_test_runner.h ..\RTSFR\Inc\rtsfr_detect.h \
-  ..\RTSFR\Inc\rtsfr_health.h ..\RTSFR\Inc\rtsfr_m5_adapter.h \
-  ..\RTSFR\Inc\rtsfr_recovery.h ..\RTSFR\Inc\rtsfr_safe_mode.h \
-  ..\RTSFR\Inc\rtsfr_verify.h ..\RTSFR\Inc\rtsfr_resource.h \
-  ..\RTSFR\Inc\rtsfr_policy.h ..\RTSFR\Inc\rtsfr_trace.h \
+  ..\tests\target\m5_test_runner.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_detect.h \
+  ..\App\RTSFR\Inc\rtsfr_health.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_kernel.h \
+  ..\App\RTSFR\Inc\rtsfr_m5_adapter.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_recovery.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_safe_mode.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_verify.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_resource.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_policy.h \
+  ..\App\RTSFR\Inc\rtsfr_trace.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\semphr.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\queue.h

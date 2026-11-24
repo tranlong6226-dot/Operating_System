@@ -23,7 +23,7 @@ operating_system_project/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h ..\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Core\Inc\FreeRTOSConfig.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \
@@ -32,5 +32,6 @@ operating_system_project/main.o: ..\Core\Src\main.c ..\Core\Inc\main.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\CMSIS_RTOS_V2\cmsis_os2.h \
-  ..\board\iwdg.h ..\RTSFR\Inc\rtsfr_types.h ..\App\m5_command.h \
-  ..\RTSFR\Inc\rtsfr_system.h
+  ..\board\iwdg.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
+  ..\App\m5_command.h ..\App\RTSFR\Inc\rtsfr_system.h

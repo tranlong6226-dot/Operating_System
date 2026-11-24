@@ -22,8 +22,8 @@ operating_system_project/stm32f1xx_it.o: ..\Core\Src\stm32f1xx_it.c \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_tim_ex.h \
   ..\Drivers\STM32F1xx_HAL_Driver\Inc\stm32f1xx_hal_uart.h \
   ..\Core\Inc\stm32f1xx_it.h ..\board\m5_uart.h \
-  ..\RTSFR\Inc\rtsfr_trace.h ..\RTSFR\Inc\rtsfr_m5_config.h \
-  ..\RTSFR\Inc\rtsfr_types.h \
+  ..\App\RTSFR\Inc\rtsfr_trace.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
   ..\Core\Inc\FreeRTOSConfig.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \

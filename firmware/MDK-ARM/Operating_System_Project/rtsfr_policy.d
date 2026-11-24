@@ -1,8 +1,11 @@
-operating_system_project/rtsfr_policy.o: ..\RTSFR\Src\rtsfr_policy.c \
-  ..\RTSFR\Inc\rtsfr_policy.h ..\RTSFR\Inc\rtsfr_recovery.h \
-  ..\RTSFR\Inc\rtsfr_safe_mode.h ..\RTSFR\Inc\rtsfr_types.h \
+operating_system_project/rtsfr_policy.o: \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\rtsfr\rtsfr_policy.c \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_policy.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_recovery.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_safe_mode.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h ..\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Core\Inc\FreeRTOSConfig.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \

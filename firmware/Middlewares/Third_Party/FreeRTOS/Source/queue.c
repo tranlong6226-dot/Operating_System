@@ -132,11 +132,20 @@ typedef struct QueueDefinition 		/* The old naming convention is used to prevent
 		uint8_t ucQueueType;
 	#endif
 
+	#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+		RtsfrQueueMetadata_t xRtsfr;
+	#endif
+
 } xQUEUE;
 
 /* The old xQUEUE name is maintained above then typedefed to the new Queue_t
 name below to enable the use of older kernel aware debuggers. */
 typedef xQUEUE Queue_t;
+
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+	typedef char RtsfrStaticQueueSizeMustMatch[
+		( sizeof( StaticQueue_t ) == sizeof( Queue_t ) ) ? 1 : -1 ];
+#endif
 
 /*-----------------------------------------------------------*/
 
@@ -460,6 +469,12 @@ static void prvInitialiseNewQueue( const UBaseType_t uxQueueLength, const UBaseT
 		pxNewQueue->pxQueueSetContainer = NULL;
 	}
 	#endif /* configUSE_QUEUE_SETS */
+
+	#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+	{
+		( void ) memset( &( pxNewQueue->xRtsfr ), 0, sizeof( pxNewQueue->xRtsfr ) );
+	}
+	#endif
 
 	traceQUEUE_CREATE( pxNewQueue );
 }
@@ -1474,6 +1489,25 @@ Queue_t * const pxQueue = xQueue;
 						pxQueue->u.xSemaphore.xMutexHolder = pvTaskIncrementMutexHeldCount();
 						#if ( configRTSFR_ENABLE == 1 )
 						{
+							RtsfrTaskMetadata_t xOwnerMetadata;
+							if( pxQueue->xRtsfr.ucResourceType == ( uint8_t ) 1U )
+							{
+								pxQueue->xRtsfr.pvOwnerTask =
+									( void * ) pxQueue->u.xSemaphore.xMutexHolder;
+								pxQueue->xRtsfr.ucResourceState = ( uint8_t ) 1U;
+								if( xTaskRtsfrGetMetadata(
+										pxQueue->u.xSemaphore.xMutexHolder,
+										&xOwnerMetadata ) == pdPASS )
+								{
+									pxQueue->xRtsfr.usOwnerGeneration =
+										xOwnerMetadata.usGeneration;
+								}
+								( void ) xTaskRtsfrSetResourceOwnership(
+									pxQueue->u.xSemaphore.xMutexHolder,
+									( uint8_t ) 1U,
+									( uint8_t ) pxQueue->xRtsfr.usResourceId,
+									pdTRUE );
+							}
 							rtsfr_resource_hook_mutex_taken( pxQueue,
 								pxQueue->u.xSemaphore.xMutexHolder );
 						}
@@ -2102,6 +2136,17 @@ UBaseType_t uxMessagesWaiting;
 				{
 					rtsfr_resource_hook_mutex_given( pxQueue,
 						pxQueue->u.xSemaphore.xMutexHolder );
+					if( pxQueue->xRtsfr.ucResourceType == ( uint8_t ) 1U )
+					{
+						( void ) xTaskRtsfrSetResourceOwnership(
+							pxQueue->u.xSemaphore.xMutexHolder,
+							( uint8_t ) 1U,
+							( uint8_t ) pxQueue->xRtsfr.usResourceId,
+							pdFALSE );
+						pxQueue->xRtsfr.pvOwnerTask = NULL;
+						pxQueue->xRtsfr.usOwnerGeneration = ( uint16_t ) 0U;
+						pxQueue->xRtsfr.ucResourceState = ( uint8_t ) 0U;
+					}
 				}
 				#endif
 				pxQueue->u.xSemaphore.xMutexHolder = NULL;
@@ -2796,6 +2841,48 @@ Queue_t * const pxQueue = xQueue;
 	}
 
 #endif /* configUSE_QUEUE_SETS */
+
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+
+	BaseType_t xQueueRtsfrRegisterMutex( QueueHandle_t xQueue,
+									   uint16_t usResourceId )
+	{
+	Queue_t *pxQueue = ( Queue_t * ) xQueue;
+		if( ( pxQueue == NULL ) ||
+			( pxQueue->uxQueueType != queueQUEUE_IS_MUTEX ) )
+		{
+			return pdFAIL;
+		}
+		taskENTER_CRITICAL();
+		{
+			pxQueue->xRtsfr.usResourceId = usResourceId;
+			pxQueue->xRtsfr.ucResourceType = ( uint8_t ) 1U;
+			pxQueue->xRtsfr.ucResourceState = ( uint8_t ) 0U;
+			pxQueue->xRtsfr.pvOwnerTask = NULL;
+			pxQueue->xRtsfr.usOwnerGeneration = ( uint16_t ) 0U;
+		}
+		taskEXIT_CRITICAL();
+		return pdPASS;
+	}
+
+	BaseType_t xQueueRtsfrGetMetadata( QueueHandle_t xQueue,
+								  RtsfrQueueMetadata_t *pxMetadata )
+	{
+	Queue_t *pxQueue = ( Queue_t * ) xQueue;
+		if( ( pxQueue == NULL ) || ( pxMetadata == NULL ) )
+		{
+			return pdFAIL;
+		}
+		taskENTER_CRITICAL();
+		{
+			*pxMetadata = pxQueue->xRtsfr;
+		}
+		taskEXIT_CRITICAL();
+		return ( pxMetadata->ucResourceType != ( uint8_t ) 0U )
+			? pdPASS : pdFAIL;
+	}
+
+#endif /* configRTSFR_ENABLE */
 /*-----------------------------------------------------------*/
 
 #if ( configUSE_QUEUE_SETS == 1 )

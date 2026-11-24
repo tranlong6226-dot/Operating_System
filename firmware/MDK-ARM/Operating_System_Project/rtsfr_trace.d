@@ -1,6 +1,6 @@
-operating_system_project/rtsfr_trace.o: ..\RTSFR\Src\rtsfr_trace.c \
-  ..\RTSFR\Inc\rtsfr_trace.h ..\RTSFR\Inc\rtsfr_m5_config.h \
-  ..\RTSFR\Inc\rtsfr_types.h \
+operating_system_project/rtsfr_trace.o: ..\App\RTSFR\Src\rtsfr_trace.c \
+  ..\App\RTSFR\Inc\rtsfr_trace.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
   ..\Core\Inc\FreeRTOSConfig.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \

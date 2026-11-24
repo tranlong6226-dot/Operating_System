@@ -2533,6 +2533,24 @@ TaskHandle_t pvTaskIncrementMutexHeldCount( void ) PRIVILEGED_FUNCTION;
  */
 void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNCTION;
 
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+/* RTSFR kernel extension APIs.  Progress is reported by the running task, so
+ * the caller cannot accidentally update another task's health record. */
+BaseType_t xTaskRtsfrBind( TaskHandle_t xTask,
+                          uint8_t ucTaskId,
+                          uint16_t usGeneration,
+                          TickType_t xTimeoutTicks ) PRIVILEGED_FUNCTION;
+BaseType_t xTaskRtsfrSetGeneration( TaskHandle_t xTask,
+                                   uint16_t usGeneration ) PRIVILEGED_FUNCTION;
+BaseType_t xTaskRtsfrReportProgress( void ) PRIVILEGED_FUNCTION;
+BaseType_t xTaskRtsfrGetMetadata( TaskHandle_t xTask,
+                                 RtsfrTaskMetadata_t *pxMetadata ) PRIVILEGED_FUNCTION;
+BaseType_t xTaskRtsfrSetResourceOwnership( TaskHandle_t xTask,
+                                          uint8_t ucResourceType,
+                                          uint8_t ucResourceIndex,
+                                          BaseType_t xOwned ) PRIVILEGED_FUNCTION;
+#endif
+
 
 #ifdef __cplusplus
 }

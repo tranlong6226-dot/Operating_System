@@ -1048,6 +1048,35 @@ the Secure Side only. */
 #define tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE	( ( ( portUSING_MPU_WRAPPERS == 0 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) && ( configSUPPORT_STATIC_ALLOCATION == 1 ) ) || \
 													  ( ( portUSING_MPU_WRAPPERS == 1 ) && ( configSUPPORT_DYNAMIC_ALLOCATION == 1 ) ) )
 
+/* RTSFR kernel extension metadata.  The structures live in FreeRTOS.h so the
+ * real kernel objects and their static-allocation mirrors use exactly the same
+ * size and alignment. */
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+	typedef struct xRTSFR_TASK_METADATA
+	{
+		uint32_t ulProgressSequence;
+		TickType_t xLastProgressTick;
+		TickType_t xTimeoutTicks;
+		TickType_t xExpectedWaitDeadline;
+		uint16_t usGeneration;
+		uint16_t usMutexBitmap;
+		uint16_t usBufferBitmap;
+		uint8_t ucTaskId;
+		uint8_t ucState;
+		uint8_t ucFlags;
+		uint8_t ucReserved;
+	} RtsfrTaskMetadata_t;
+
+	typedef struct xRTSFR_QUEUE_METADATA
+	{
+		void *pvOwnerTask;
+		uint16_t usResourceId;
+		uint16_t usOwnerGeneration;
+		uint8_t ucResourceType;
+		uint8_t ucResourceState;
+	} RtsfrQueueMetadata_t;
+#endif
+
 /*
  * In line with software engineering best practice, FreeRTOS implements a strict
  * data hiding policy, so the real structures used by FreeRTOS to maintain the
@@ -1157,6 +1186,9 @@ typedef struct xSTATIC_TCB
 	#if ( configUSE_POSIX_ERRNO == 1 )
 		int				iDummy22;
 	#endif
+	#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+		RtsfrTaskMetadata_t xRtsfrDummy23;
+	#endif
 } StaticTask_t;
 
 /*
@@ -1198,6 +1230,10 @@ typedef struct xSTATIC_QUEUE
 	#if ( configUSE_TRACE_FACILITY == 1 )
 		UBaseType_t uxDummy8;
 		uint8_t ucDummy9;
+	#endif
+
+	#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+		RtsfrQueueMetadata_t xRtsfrDummy10;
 	#endif
 
 } StaticQueue_t;

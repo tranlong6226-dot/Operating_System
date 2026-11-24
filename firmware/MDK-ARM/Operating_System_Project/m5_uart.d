@@ -1,6 +1,6 @@
 operating_system_project/m5_uart.o: ..\board\m5_uart.c ..\board\m5_uart.h \
-  ..\RTSFR\Inc\rtsfr_trace.h ..\RTSFR\Inc\rtsfr_m5_config.h \
-  ..\RTSFR\Inc\rtsfr_types.h \
+  ..\App\RTSFR\Inc\rtsfr_trace.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
   ..\Core\Inc\FreeRTOSConfig.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \

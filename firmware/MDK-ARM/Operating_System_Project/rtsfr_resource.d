@@ -1,7 +1,9 @@
-operating_system_project/rtsfr_resource.o: ..\RTSFR\Src\rtsfr_resource.c \
-  ..\RTSFR\Inc\rtsfr_resource.h ..\RTSFR\Inc\rtsfr_types.h \
+operating_system_project/rtsfr_resource.o: \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\rtsfr\rtsfr_resource.c \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_resource.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h ..\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Core\Inc\FreeRTOSConfig.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \
@@ -9,4 +11,5 @@ operating_system_project/rtsfr_resource.o: ..\RTSFR\Src\rtsfr_resource.c \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
-  ..\RTSFR\Inc\rtsfr_detect.h
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_detect.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\queue.h

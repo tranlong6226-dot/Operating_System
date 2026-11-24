@@ -1646,6 +1646,13 @@ void vQueueSetQueueNumber( QueueHandle_t xQueue, UBaseType_t uxQueueNumber ) PRI
 UBaseType_t uxQueueGetQueueNumber( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 uint8_t ucQueueGetQueueType( QueueHandle_t xQueue ) PRIVILEGED_FUNCTION;
 
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+BaseType_t xQueueRtsfrRegisterMutex( QueueHandle_t xQueue,
+                                    uint16_t usResourceId ) PRIVILEGED_FUNCTION;
+BaseType_t xQueueRtsfrGetMetadata( QueueHandle_t xQueue,
+                                  RtsfrQueueMetadata_t *pxMetadata ) PRIVILEGED_FUNCTION;
+#endif
+
 
 #ifdef __cplusplus
 }

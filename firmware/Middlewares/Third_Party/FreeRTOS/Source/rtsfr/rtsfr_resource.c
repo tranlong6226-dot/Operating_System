@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "rtsfr_detect.h"
+#include "queue.h"
 
 #define RTSFR_MUTEX_RESOURCE_BASE 1U
 #define RTSFR_BUFFER_RESOURCE_BASE 0x100U
@@ -228,6 +229,8 @@ rtsfr_status_t rtsfr_buffer_acquire(uint8_t task_id, uint8_t *out_index)
             g_buffers[index].owner_generation =
                 g_generation[prv_index(task_id)];
             *out_index = index;
+            (void)xTaskRtsfrSetResourceOwnership(
+                xTaskGetCurrentTaskHandle(), 2U, index, pdTRUE);
             taskEXIT_CRITICAL();
             return RTSFR_OK;
         }
@@ -255,6 +258,8 @@ rtsfr_status_t rtsfr_buffer_release(uint8_t task_id, uint8_t index)
     g_buffers[index].state = RTSFR_RESOURCE_FREE;
     g_buffers[index].owner_task_id = 0U;
     g_buffers[index].owner_generation = 0U;
+    (void)xTaskRtsfrSetResourceOwnership(
+        xTaskGetCurrentTaskHandle(), 2U, index, pdFALSE);
     taskEXIT_CRITICAL();
     return RTSFR_OK;
 }
@@ -288,6 +293,13 @@ rtsfr_status_t rtsfr_resource_register_mutex(const void *mutex_handle,
         g_mutex_owner[free_index] = 0U;
         g_mutex_generation[free_index] = 0U;
         *out_resource_id = (uint16_t)free_index;
+        if (xQueueRtsfrRegisterMutex((QueueHandle_t)mutex_handle,
+                                     (uint16_t)free_index) != pdPASS)
+        {
+            g_mutex_handles[free_index] = NULL;
+            taskEXIT_CRITICAL();
+            return RTSFR_ERR_INVALID;
+        }
         taskEXIT_CRITICAL();
         return RTSFR_OK;
     }

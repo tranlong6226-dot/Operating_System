@@ -26,6 +26,7 @@
 "operating_system_project\queue.o"
 "operating_system_project\stream_buffer.o"
 "operating_system_project\tasks.o"
+"operating_system_project\rtsfr_kernel.o"
 "operating_system_project\timers.o"
 "operating_system_project\cmsis_os2.o"
 "operating_system_project\heap_4.o"

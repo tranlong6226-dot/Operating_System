@@ -582,7 +582,9 @@ rtsfr-project/
 │   ├── Core/                  # CubeMX HAL, startup, UART, GPIO
 │   ├── Drivers/
 │   ├── Middlewares/            # FreeRTOS kernel và CMSIS-RTOS
-│   ├── RTSFR/                  # detection, policy, resource, recovery, trace
+│   ├── Middlewares/Third_Party/FreeRTOS/Source/rtsfr/
+│   │                              # kernel supervisor, detection, policy, resource, recovery, verify
+│   ├── App/RTSFR/              # system/health/trace/M5 adapter, không chứa core M1–M4
 │   ├── App/                    # fault injection và UART command service
 │   ├── board/                 # IWDG/UART integration
 │   ├── tests/target/          # integration test chạy trên STM32
@@ -719,6 +721,9 @@ chưa có log target tương ứng.
 | M2 policy deterministic, retry window | Đã triển khai | TC07 kiểm tra retry exhaustion |
 | Không restart khi mutex/unknown/in-flight | Đã triển khai | TC06; `unsafe_restarts_prevented` |
 | M3 hook mutex trong `queue.c` | Đã triển khai | Hook sau take/give thành công |
+| Metadata RTSFR trong TCB và `Queue_t` | Đã triển khai | `RtsfrTaskMetadata_t`, `RtsfrQueueMetadata_t`; có size check cho object tĩnh |
+| Kernel-owned supervisor | Đã triển khai | Tạo từ `vTaskStartScheduler()`; application không gọi control-loop |
+| Kernel control path M1–M4 | Đã triển khai | Toàn bộ core nằm tại `FreeRTOS/Source/rtsfr`; supervisor sở hữu detect → resource → policy → recovery |
 | Managed buffer có cleanup contract | Đã triển khai | TC05 và TC14 |
 | M4 quiesce → revalidate → cleanup → recreate → verify | Đã triển khai | Generation mới và first-progress gate |
 | Chờ Idle Task cleanup TCB/stack | Đã triển khai | Chờ số task pending cleanup về baseline |
@@ -772,6 +777,6 @@ thế bằng việc firmware build thành công.
 ### 15.5. Trạng thái build gần nhất
 
 - Toolchain: ArmClang 6.24 / MDK-ARM.
-- Kết quả sau tái cấu trúc thư mục: `0 Error(s), 0 Warning(s)`.
-- Kích thước: Code 40,260 bytes; RO 3,748; RW 60; ZI 16,068.
-- Log: `firmware/MDK-ARM/restructure_rebuild.log`.
+- Kết quả sau tích hợp kernel extension: `0 Error(s), 0 Warning(s)`.
+- Kích thước: Code 41,768 bytes; RO 3,748; RW 60; ZI 16,172.
+- Log: `firmware/MDK-ARM/rtsfr_kernel_build.log`.

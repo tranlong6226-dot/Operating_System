@@ -1,6 +1,9 @@
-operating_system_project/rtsfr_verify.o: ..\RTSFR\Src\rtsfr_verify.c \
-  ..\RTSFR\Inc\rtsfr_verify.h ..\RTSFR\Inc\rtsfr_m5_config.h \
-  ..\RTSFR\Inc\rtsfr_resource.h ..\RTSFR\Inc\rtsfr_types.h \
+operating_system_project/rtsfr_verify.o: \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\rtsfr\rtsfr_verify.c \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_verify.h \
+  ..\App\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_resource.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
   ..\Core\Inc\FreeRTOSConfig.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
@@ -10,4 +13,4 @@ operating_system_project/rtsfr_verify.o: ..\RTSFR\Src\rtsfr_verify.c \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
-  ..\RTSFR\Inc\rtsfr_trace.h
+  ..\App\RTSFR\Inc\rtsfr_trace.h

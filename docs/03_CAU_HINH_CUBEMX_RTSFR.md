@@ -532,7 +532,7 @@ Include paths cần bổ sung theo cấu trúc nhóm chọn, ví dụ:
 
 ```text
 ../App
-../RTSFR/Inc
+../App/RTSFR/Inc
 ../board
 ../tests/target
 ```
@@ -558,17 +558,17 @@ Include paths cần bổ sung theo cấu trúc nhóm chọn, ví dụ:
 | Trace facility | Bật | Đã bật | Đạt | Không đổi |
 | Mutex | Bật | Đã bật | Đạt | Không đổi |
 | Task delete/suspend | Bật | Đã bật | Đạt | Không đổi |
-| Stack overflow check | Mức 2 | Chưa có | Thiếu | Bổ sung |
-| Malloc failed hook | Bật | Chưa có | Thiếu | Bổ sung |
-| USART1 | PA9/PA10, 115200 8N1 | Chưa cấu hình | Thiếu bắt buộc | Bật ngay |
-| USART1 IRQ | Priority 6 | Chưa có | Thiếu | Bật ngay |
-| LED status | PC13 output | Chưa cấu hình | Thiếu | Bật ngay |
-| IWDG | Khoảng 4 s, health gate | Chưa cấu hình | Chưa cần ở G0 | Bật tại G4 |
-| Demo tasks | Sensor/Comm/Control | Chỉ defaultTask | Thiếu | Tạo qua descriptor |
-| Supervisor | Priority cao hơn monitored tasks | Chưa có | Thiếu | Tạo trong RTSFR init |
-| UART trace ring | Non-blocking producer | Chưa có | Thiếu | M5 triển khai |
-| Kernel hooks | `tasks.c`, `queue.c` | Chưa có | Thiếu | Chỉ làm sau khi khóa kernel |
-| Kernel source control | Một kernel fork chính thức | Kernel trong CubeMX Middlewares | Rủi ro | Fork/freeze trước khi patch |
+| Stack overflow check | Mức 2 | Đã bật | Đạt | Giữ `configCHECK_FOR_STACK_OVERFLOW=2` |
+| Malloc failed hook | Bật | Đã bật | Đạt | Giữ hook hiện tại |
+| USART1 | PA9/PA10, 115200 8N1 | Đã cấu hình | Đạt | Không đổi |
+| USART1 IRQ | Priority 6 | Đã cấu hình | Đạt | Không đổi |
+| LED status | PC13 output | Đã cấu hình | Đạt | Active-low |
+| IWDG | Khoảng 4 s, health gate | Đã cấu hình | Đạt G4 | D05 reset thật |
+| Demo tasks | Sensor/Comm/Control | Tạo từ descriptor | Đạt | Monitored TCB được bind ID/generation |
+| Supervisor | Priority cao hơn monitored tasks | Kernel tạo trong `vTaskStartScheduler()` | Đạt | Không tạo từ application |
+| UART trace ring | Non-blocking producer | Đã triển khai | Đạt | UART chỉ consumer phía board |
+| Kernel hooks | `tasks.c`, `queue.c` | Đã triển khai | Đạt | TCB, lifecycle, mutex take/give |
+| Kernel source control | Một kernel fork chính thức | Một đường kernel trong Middlewares | Đạt có điều kiện | Không generate đè patch |
 
 ---
 
@@ -624,7 +624,7 @@ Thực hiện theo đúng thứ tự sau:
 - [ ] High-water mark của từng task được ghi lại.
 - [ ] Heap, priority và stack được ghi trong tài liệu build environment.
 
-### Trước khi sửa kernel
+### Trước khi sửa hoặc generate lại kernel
 
 - [ ] FreeRTOS version/tag/SHA đã khóa.
 - [ ] Toolchain và optimization level đã khóa.
@@ -636,16 +636,14 @@ Thực hiện theo đúng thứ tự sau:
 
 ## 16. Kết luận hiện trạng
 
-Project hiện tại đã có nền MCU, clock, SysTick/TIM4, FreeRTOS/CMSIS-V2, mutex, trace facility, dynamic allocation và Keil RVDS port phù hợp. Các phần nền này không cần làm lại.
+Project hiện tại đã có nền MCU, clock, SysTick/TIM4, FreeRTOS/CMSIS-V2, mutex,
+trace facility, dynamic allocation và kernel extension RTSFR. Cấu hình phần cứng
+không cần làm lại. Rủi ro chính còn lại là CubeMX ghi đè `FreeRTOS.h`, `tasks.c`,
+`queue.c` hoặc xóa `rtsfr_kernel.c` khỏi Keil project; luôn audit các mục ở phần
+bảo vệ thay đổi kernel sau mỗi lần Generate Code.
 
-Những cấu hình CubeMX còn thiếu và cần làm ngay để đạt G0:
-
-1. USART1 PA9/PA10, 115200 8N1 và USART1 IRQ.
-2. PC13 làm LED trạng thái.
-3. Tăng FreeRTOS heap tạm thời từ 3072 lên 8192 byte.
-4. Đổi defaultTask thành BootstrapTask.
-5. Bật stack overflow checking và malloc failed hook.
-6. Chọn/lưu lại đúng metadata toolchain MDK-ARM trong `.ioc`.
-
-IWDG chưa phải việc làm ngay. Chỉ bật sau khi detection và recovery V1 đã chạy ổn định, trước khi triển khai TC12 và Gate G4.
+Các mục USART1, PC13, heap 8192 byte, `bootstrapTask`, stack-overflow check,
+malloc-failed hook, MDK-ARM metadata và IWDG đều đã được cấu hình. Khi thay đổi
+`.ioc`, chỉ cần xác nhận chúng vẫn giữ đúng giá trị và build lại với kết quả
+`0 Error(s), 0 Warning(s)`.
 

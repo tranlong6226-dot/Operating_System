@@ -13,6 +13,23 @@ Detection → Resource Tracking → Policy → Recovery / SAFE_MODE / IWDG Reset
 PC chỉ gửi lệnh và hiển thị telemetry qua UART. Quyết định phát hiện, policy và
 phục hồi được thực hiện trên STM32 chạy FreeRTOS.
 
+## Phần mở rộng kernel hiện tại
+
+RTSFR không còn phụ thuộc vào vòng `poll` của `bootstrapTask`. FreeRTOS tạo
+`RTSFR-Kernel` trực tiếp trong `vTaskStartScheduler()` và task nội bộ này sở hữu
+toàn bộ control path `Detection → Resource → Policy → Recovery`.
+
+| Điểm tích hợp | Nội dung thêm vào kernel |
+|---|---|
+| `FreeRTOS.h` / `tasks.c` | Metadata RTSFR nằm trong TCB: ID, generation, progress, timeout và bitmap tài nguyên |
+| `vTaskStartScheduler()` | Tạo supervisor `RTSFR-Kernel` trước khi scheduler bắt đầu |
+| `vTaskDelete()` | Gỡ handle của monitored task khỏi detector ngay trong lifecycle kernel |
+| `queue.c` | Metadata nằm trong `Queue_t`; hook mutex take/give cập nhật owner và generation sau khi thao tác thành công |
+| `Source/rtsfr/*.c` | Chứa kernel supervisor và core M1–M4: detection, resource, policy, recovery, safe mode, verification |
+
+`Core/Src/main.c` chỉ khởi tạo adapter/demo và phục vụ UART. UART, GPIO và HAL
+không được gọi trong fast-path của `tasks.c` hoặc `queue.c`.
+
 ## Chức năng chính
 
 - Giám sát progress và health của các application task.
@@ -55,9 +72,14 @@ Operating_System_Project/
 │   ├── Operating_System_Project.ioc
 │   ├── Core/
 │   ├── Drivers/
-│   ├── Middlewares/          # FreeRTOS và CMSIS-RTOS
-│   ├── RTSFR/                # Detection, policy, resource, recovery, trace
-│   ├── App/                  # UART commands và fault injection
+│   ├── Middlewares/
+│   │   └── Third_Party/FreeRTOS/Source/
+│   │       ├── tasks.c, queue.c
+│   │       ├── include/      # Public FreeRTOS + RTSFR core headers
+│   │       └── rtsfr/        # Kernel supervisor và core M1–M4
+│   ├── App/
+│   │   ├── RTSFR/            # System/health/trace/M5 application adapter
+│   │   └── ...               # UART commands và fault injection
 │   ├── board/                # USART1, DWT cycle counter và IWDG
 │   ├── tests/target/         # Test runner chạy trên STM32
 │   └── MDK-ARM/              # Project Keil và build output
@@ -185,14 +207,14 @@ minimum heap và monitor cycles lớn nhất.
 | `RTSFR_IWDG_CONFIG_CONFIRMED` | 1 |
 | `configRTSFR_M4_TARGET_TEST` | 0 |
 
-Build kiểm tra gần nhất sau khi tái cấu trúc thư mục:
+Build kiểm tra gần nhất sau khi tích hợp kernel extension:
 
 ```text
-Code=40260  RO-data=3748  RW-data=60  ZI-data=16068
+Code=41768  RO-data=3748  RW-data=60  ZI-data=16172
 0 Error(s), 0 Warning(s)
 ```
 
-Log build: `firmware/MDK-ARM/restructure_rebuild.log`.
+Log build: `firmware/MDK-ARM/rtsfr_kernel_build.log`.
 
 ## Tài liệu
 

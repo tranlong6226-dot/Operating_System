@@ -1,7 +1,7 @@
 operating_system_project/iwdg.o: ..\board\iwdg.c ..\board\iwdg.h \
-  ..\RTSFR\Inc\rtsfr_types.h \
+  ..\Middlewares\Third_Party\FreeRTOS\Source\include\rtsfr_types.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\FreeRTOS.h \
-  ..\Core\Inc\FreeRTOSConfig.h ..\RTSFR\Inc\rtsfr_m5_config.h \
+  ..\Core\Inc\FreeRTOSConfig.h ..\App\RTSFR\Inc\rtsfr_m5_config.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\projdefs.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\portable.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\deprecated_definitions.h \
@@ -9,8 +9,8 @@ operating_system_project/iwdg.o: ..\board\iwdg.c ..\board\iwdg.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\mpu_wrappers.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\task.h \
   ..\Middlewares\Third_Party\FreeRTOS\Source\include\list.h \
-  ..\board\m5_uart.h ..\RTSFR\Inc\rtsfr_trace.h \
-  ..\RTSFR\Inc\rtsfr_health.h \
+  ..\board\m5_uart.h ..\App\RTSFR\Inc\rtsfr_trace.h \
+  ..\App\RTSFR\Inc\rtsfr_health.h \
   ..\Drivers\CMSIS\Device\ST\STM32F1xx\Include\stm32f1xx.h \
   ..\Drivers\CMSIS\Device\ST\STM32F1xx\Include\stm32f103xb.h \
   ..\Drivers\CMSIS\Include\core_cm3.h \

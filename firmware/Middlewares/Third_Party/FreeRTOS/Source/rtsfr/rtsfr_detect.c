@@ -131,6 +131,15 @@ rtsfr_status_t rtsfr_register_task(const rtsfr_task_config_t *cfg,
     record->fault_pending = false;
     taskEXIT_CRITICAL();
 
+    if (xTaskRtsfrBind(task_handle, cfg->task_id, 1U,
+                       cfg->timeout_ticks) != pdPASS)
+    {
+        taskENTER_CRITICAL();
+        (void)memset(record, 0, sizeof(*record));
+        taskEXIT_CRITICAL();
+        return RTSFR_ERR_INTERNAL;
+    }
+
     rtsfr_resource_on_new_generation(cfg->task_id, 1U);
     return RTSFR_OK;
 }
@@ -317,6 +326,8 @@ void rtsfr_detect_on_new_generation(uint8_t task_id,
     record->state = RTSFR_TASK_HEALTHY;
     record->fault_pending = false;
     taskEXIT_CRITICAL();
+    (void)xTaskRtsfrBind(new_handle, task_id, new_generation,
+                         record->timeout_ticks);
     rtsfr_resource_on_new_generation(task_id, new_generation);
 }
 

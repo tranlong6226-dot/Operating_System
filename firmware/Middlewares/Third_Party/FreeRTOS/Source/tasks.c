@@ -40,6 +40,12 @@ task.h is included from an application file. */
 #include "timers.h"
 #include "stack_macros.h"
 
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+	#include "rtsfr_detect.h"
+	#include "rtsfr_kernel.h"
+	#include "rtsfr_recovery.h"
+#endif
+
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
 because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
 for the header files above, but not in this file, in order to generate the
@@ -326,11 +332,20 @@ typedef struct tskTaskControlBlock 			/* The old naming convention is used to pr
 		int iTaskErrno;
 	#endif
 
+	#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+		RtsfrTaskMetadata_t xRtsfr;
+	#endif
+
 } tskTCB;
 
 /* The old tskTCB name is maintained above then typedefed to the new TCB_t name
 below to enable the use of older kernel aware debuggers. */
 typedef tskTCB TCB_t;
+
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+	typedef char RtsfrStaticTaskSizeMustMatch[
+		( sizeof( StaticTask_t ) == sizeof( TCB_t ) ) ? 1 : -1 ];
+#endif
 
 /*lint -save -e956 A manual analysis and inspection has been used to determine
 which static variables must be declared volatile. */
@@ -1009,6 +1024,12 @@ UBaseType_t x;
 	}
 	#endif
 
+	#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+	{
+		( void ) memset( &( pxNewTCB->xRtsfr ), 0, sizeof( pxNewTCB->xRtsfr ) );
+	}
+	#endif
+
 	/* Initialize the TCB stack to look as if the task was already running,
 	but had been interrupted by the scheduler.  The return address is set
 	to the start of the task function. Once the stack has been initialised
@@ -1194,6 +1215,16 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 			portPRE_TASK_DELETE_HOOK() as in the Windows port that macro will
 			not return. */
 			uxTaskNumber++;
+
+			#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+			{
+				if( pxTCB->xRtsfr.ucTaskId != ( uint8_t ) 0U )
+				{
+					rtsfr_detect_on_task_delete( ( TaskHandle_t ) pxTCB );
+					pxTCB->xRtsfr.ucState = ( uint8_t ) RTSFR_TASK_QUIESCING;
+				}
+			}
+			#endif
 
 			if( pxTCB == pxCurrentTCB )
 			{
@@ -1975,6 +2006,9 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 void vTaskStartScheduler( void )
 {
 BaseType_t xReturn;
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+TaskHandle_t xRtsfrSupervisorHandle = NULL;
+#endif
 
 	/* Add the idle task at the lowest priority. */
 	#if( configSUPPORT_STATIC_ALLOCATION == 1 )
@@ -2027,6 +2061,24 @@ BaseType_t xReturn;
 		}
 	}
 	#endif /* configUSE_TIMERS */
+
+	#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+	{
+		if( xReturn == pdPASS )
+		{
+			xReturn = xTaskCreate( vRtsfrKernelSupervisorTask,
+								 "RTSFR-Kernel",
+								 configRTSFR_SUPERVISOR_STACK_DEPTH,
+								 NULL,
+								 configRTSFR_SUPERVISOR_PRIORITY,
+								 &xRtsfrSupervisorHandle );
+			if( xReturn == pdPASS )
+			{
+				vRtsfrKernelSetSupervisorHandle( xRtsfrSupervisorHandle );
+			}
+		}
+	}
+	#endif
 
 	if( xReturn == pdPASS )
 	{
@@ -5302,6 +5354,150 @@ const TickType_t xConstTickCount = xTickCount;
 	}
 	#endif /* INCLUDE_vTaskSuspend */
 }
+
+#if defined( configRTSFR_ENABLE ) && ( configRTSFR_ENABLE == 1 )
+
+	BaseType_t xTaskRtsfrBind( TaskHandle_t xTask,
+							 uint8_t ucTaskId,
+							 uint16_t usGeneration,
+							 TickType_t xTimeoutTicks )
+	{
+	TCB_t *pxTCB = prvGetTCBFromHandle( xTask );
+
+		if( ( pxTCB == NULL ) || ( ucTaskId == ( uint8_t ) 0U ) ||
+			( ucTaskId > ( uint8_t ) configRTSFR_MAX_TRACKED_TASKS ) ||
+			( usGeneration == ( uint16_t ) 0U ) ||
+			( xTimeoutTicks == ( TickType_t ) 0U ) )
+		{
+			return pdFAIL;
+		}
+
+		taskENTER_CRITICAL();
+		{
+			( void ) memset( &( pxTCB->xRtsfr ), 0, sizeof( pxTCB->xRtsfr ) );
+			pxTCB->xRtsfr.ucTaskId = ucTaskId;
+			pxTCB->xRtsfr.usGeneration = usGeneration;
+			pxTCB->xRtsfr.xTimeoutTicks = xTimeoutTicks;
+			pxTCB->xRtsfr.xLastProgressTick = xTickCount;
+			pxTCB->xRtsfr.ucState = ( uint8_t ) RTSFR_TASK_HEALTHY;
+			pxTCB->xRtsfr.ucFlags = ( uint8_t ) 1U;
+		}
+		taskEXIT_CRITICAL();
+		return pdPASS;
+	}
+
+	BaseType_t xTaskRtsfrSetGeneration( TaskHandle_t xTask,
+								  uint16_t usGeneration )
+	{
+	TCB_t *pxTCB = prvGetTCBFromHandle( xTask );
+
+		if( ( pxTCB == NULL ) || ( usGeneration == ( uint16_t ) 0U ) ||
+			( pxTCB->xRtsfr.ucTaskId == ( uint8_t ) 0U ) )
+		{
+			return pdFAIL;
+		}
+		taskENTER_CRITICAL();
+		{
+			pxTCB->xRtsfr.usGeneration = usGeneration;
+			pxTCB->xRtsfr.ulProgressSequence = 0UL;
+			pxTCB->xRtsfr.xLastProgressTick = xTickCount;
+			pxTCB->xRtsfr.xExpectedWaitDeadline = ( TickType_t ) 0U;
+			pxTCB->xRtsfr.usMutexBitmap = ( uint16_t ) 0U;
+			pxTCB->xRtsfr.usBufferBitmap = ( uint16_t ) 0U;
+			pxTCB->xRtsfr.ucState = ( uint8_t ) RTSFR_TASK_HEALTHY;
+		}
+		taskEXIT_CRITICAL();
+		return pdPASS;
+	}
+
+	BaseType_t xTaskRtsfrReportProgress( void )
+	{
+	TCB_t *pxTCB = pxCurrentTCB;
+	uint8_t ucTaskId;
+	uint16_t usGeneration;
+
+		if( ( pxTCB == NULL ) || ( pxTCB->xRtsfr.ucTaskId == ( uint8_t ) 0U ) )
+		{
+			return pdFAIL;
+		}
+		ucTaskId = pxTCB->xRtsfr.ucTaskId;
+		usGeneration = pxTCB->xRtsfr.usGeneration;
+		if( rtsfr_report_progress( ucTaskId ) != RTSFR_OK )
+		{
+			return pdFAIL;
+		}
+
+		taskENTER_CRITICAL();
+		{
+			pxTCB->xRtsfr.ulProgressSequence++;
+			pxTCB->xRtsfr.xLastProgressTick = xTickCount;
+			pxTCB->xRtsfr.xExpectedWaitDeadline = ( TickType_t ) 0U;
+			pxTCB->xRtsfr.ucState = ( uint8_t ) RTSFR_TASK_HEALTHY;
+		}
+		taskEXIT_CRITICAL();
+		rtsfr_recovery_on_first_progress( ucTaskId, usGeneration );
+		return pdPASS;
+	}
+
+	BaseType_t xTaskRtsfrGetMetadata( TaskHandle_t xTask,
+								RtsfrTaskMetadata_t *pxMetadata )
+	{
+	TCB_t *pxTCB = prvGetTCBFromHandle( xTask );
+		if( ( pxTCB == NULL ) || ( pxMetadata == NULL ) )
+		{
+			return pdFAIL;
+		}
+		taskENTER_CRITICAL();
+		{
+			*pxMetadata = pxTCB->xRtsfr;
+		}
+		taskEXIT_CRITICAL();
+		return ( pxMetadata->ucTaskId != ( uint8_t ) 0U ) ? pdPASS : pdFAIL;
+	}
+
+	BaseType_t xTaskRtsfrSetResourceOwnership( TaskHandle_t xTask,
+										 uint8_t ucResourceType,
+										 uint8_t ucResourceIndex,
+										 BaseType_t xOwned )
+	{
+	TCB_t *pxTCB = prvGetTCBFromHandle( xTask );
+	uint16_t usMask;
+	uint16_t *pusBitmap;
+
+		if( ( pxTCB == NULL ) || ( ucResourceIndex >= ( uint8_t ) 16U ) ||
+			( pxTCB->xRtsfr.ucTaskId == ( uint8_t ) 0U ) )
+		{
+			return pdFAIL;
+		}
+		if( ucResourceType == ( uint8_t ) 1U )
+		{
+			pusBitmap = &( pxTCB->xRtsfr.usMutexBitmap );
+		}
+		else if( ucResourceType == ( uint8_t ) 2U )
+		{
+			pusBitmap = &( pxTCB->xRtsfr.usBufferBitmap );
+		}
+		else
+		{
+			return pdFAIL;
+		}
+		usMask = ( uint16_t ) ( ( uint16_t ) 1U << ucResourceIndex );
+		taskENTER_CRITICAL();
+		{
+			if( xOwned != pdFALSE )
+			{
+				*pusBitmap |= usMask;
+			}
+			else
+			{
+				*pusBitmap &= ( uint16_t ) ~usMask;
+			}
+		}
+		taskEXIT_CRITICAL();
+		return pdPASS;
+	}
+
+#endif /* configRTSFR_ENABLE */
 
 /* Code below here allows additional code to be inserted into this source file,
 especially where access to file scope functions and data is needed (for example

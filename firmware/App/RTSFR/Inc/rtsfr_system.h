@@ -18,7 +18,6 @@ typedef struct
 } rtsfr_system_metrics_t;
 
 rtsfr_status_t rtsfr_system_init(void);
-void rtsfr_system_poll(void);
 bool rtsfr_system_is_ready(void);
 rtsfr_status_t rtsfr_system_get_metrics(rtsfr_system_metrics_t *out);
 rtsfr_status_t rtsfr_system_emit_snapshot(void);

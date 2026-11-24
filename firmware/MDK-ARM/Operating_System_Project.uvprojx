@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../RTSFR/Inc;../App;../board;../tests/target;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Core/Inc;../App/RTSFR/Inc;../App;../board;../tests/target;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Middlewares/Third_Party/FreeRTOS/Source/include;../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2;../Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -591,6 +591,11 @@
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/tasks.c</FilePath>
             </File>
             <File>
+              <FileName>rtsfr_kernel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_kernel.c</FilePath>
+            </File>
+            <File>
               <FileName>timers.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/timers.c</FilePath>
@@ -618,12 +623,12 @@
             <File>
               <FileName>rtsfr_recovery.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_recovery.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_recovery.c</FilePath>
             </File>
             <File>
               <FileName>rtsfr_safe_mode.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_safe_mode.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_safe_mode.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -633,12 +638,12 @@
             <File>
               <FileName>rtsfr_detect.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_detect.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_detect.c</FilePath>
             </File>
             <File>
               <FileName>rtsfr_resource.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_resource.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_resource.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -648,7 +653,7 @@
             <File>
               <FileName>rtsfr_policy.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_policy.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_policy.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -658,22 +663,22 @@
             <File>
               <FileName>rtsfr_trace.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_trace.c</FilePath>
+              <FilePath>../App/RTSFR/Src/rtsfr_trace.c</FilePath>
             </File>
             <File>
               <FileName>rtsfr_health.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_health.c</FilePath>
+              <FilePath>../App/RTSFR/Src/rtsfr_health.c</FilePath>
             </File>
             <File>
               <FileName>rtsfr_verify.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_verify.c</FilePath>
+              <FilePath>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_verify.c</FilePath>
             </File>
             <File>
               <FileName>rtsfr_m5_adapter.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_m5_adapter.c</FilePath>
+              <FilePath>../App/RTSFR/Src/rtsfr_m5_adapter.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -683,7 +688,7 @@
             <File>
               <FileName>rtsfr_system.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../RTSFR/Src/rtsfr_system.c</FilePath>
+              <FilePath>../App/RTSFR/Src/rtsfr_system.c</FilePath>
             </File>
             <File>
               <FileName>fault_scenarios.c</FileName>

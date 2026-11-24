@@ -467,7 +467,7 @@
 
   <Group>
     <GroupName>Middlewares/FreeRTOS</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -606,7 +606,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_recovery.c</PathWithFileName>
+      <PathWithFileName>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_recovery.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_recovery.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -618,7 +618,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_safe_mode.c</PathWithFileName>
+      <PathWithFileName>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_safe_mode.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_safe_mode.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -627,7 +627,7 @@
 
   <Group>
     <GroupName>RTSFR/Module1_3</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -638,7 +638,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_detect.c</PathWithFileName>
+      <PathWithFileName>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_detect.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_detect.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -650,7 +650,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_resource.c</PathWithFileName>
+      <PathWithFileName>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_resource.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_resource.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -670,7 +670,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_policy.c</PathWithFileName>
+      <PathWithFileName>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_policy.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_policy.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -690,7 +690,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_trace.c</PathWithFileName>
+      <PathWithFileName>../App/RTSFR/Src/rtsfr_trace.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_trace.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -702,7 +702,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_health.c</PathWithFileName>
+      <PathWithFileName>../App/RTSFR/Src/rtsfr_health.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_health.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -714,7 +714,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_verify.c</PathWithFileName>
+      <PathWithFileName>../Middlewares/Third_Party/FreeRTOS/Source/rtsfr/rtsfr_verify.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_verify.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -726,7 +726,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_m5_adapter.c</PathWithFileName>
+      <PathWithFileName>../App/RTSFR/Src/rtsfr_m5_adapter.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_m5_adapter.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -746,7 +746,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>../RTSFR/Src/rtsfr_system.c</PathWithFileName>
+      <PathWithFileName>../App/RTSFR/Src/rtsfr_system.c</PathWithFileName>
       <FilenameWithoutPath>rtsfr_system.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>

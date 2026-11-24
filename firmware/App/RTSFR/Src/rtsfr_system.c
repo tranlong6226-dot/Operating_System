@@ -9,6 +9,7 @@
 #include "m5_test_runner.h"
 #include "rtsfr_detect.h"
 #include "rtsfr_health.h"
+#include "rtsfr_kernel.h"
 #include "rtsfr_m5_adapter.h"
 #include "rtsfr_policy.h"
 #include "rtsfr_recovery.h"
@@ -66,6 +67,8 @@ static uint16_t g_successful_recoveries;
 static uint16_t g_unsafe_restarts_prevented;
 static uint16_t g_false_alarms_rolled_back;
 
+static void prv_application_maintenance(void);
+
 static rtsfr_demo_context_t *prv_context(uint8_t task_id)
 {
     if ((task_id == 0U) || (task_id > configRTSFR_MAX_TASKS))
@@ -77,7 +80,7 @@ static rtsfr_demo_context_t *prv_context(uint8_t task_id)
 
 static void prv_report_progress(rtsfr_demo_context_t *context)
 {
-    if (rtsfr_report_progress(context->task_id) == RTSFR_OK)
+    if (xTaskRtsfrReportProgress() == pdPASS)
     {
         if (!g_safe_output_active)
         {
@@ -94,8 +97,6 @@ static void prv_report_progress(rtsfr_demo_context_t *context)
                 HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
             }
         }
-        rtsfr_recovery_on_first_progress(context->task_id,
-                                         context->generation);
         if (context->first_progress_pending)
         {
             context->first_progress_pending = false;
@@ -816,73 +817,62 @@ uint32_t rtsfr_detect_event_correlation(uint8_t task_id,
     return rtsfr_fault_correlation(task_id, generation);
 }
 
-static void prv_handle_fault(const rtsfr_fault_event_t *fault)
+static void prv_kernel_decision(
+    const rtsfr_fault_event_t *fault,
+    const rtsfr_resource_summary_t *resource,
+    const rtsfr_decision_t *decision)
 {
-    rtsfr_task_record_t record;
-    rtsfr_resource_summary_t resource;
-    rtsfr_decision_t decision;
     rtsfr_demo_context_t *context;
 
-    if (rtsfr_detect_get_record(fault->task_id, &record) != RTSFR_OK)
+    if ((fault == NULL) || (resource == NULL) || (decision == NULL))
     {
         return;
-    }
-    if ((record.generation != fault->generation) ||
-        ((record.state == RTSFR_TASK_HEALTHY) &&
-         (record.progress_seq > fault->evidence)))
-    {
-        if ((record.generation == fault->generation) &&
-            (record.progress_seq > fault->evidence) &&
-            (g_false_alarms_rolled_back != UINT16_MAX))
-        {
-            g_false_alarms_rolled_back++;
-        }
-        return;
-    }
-    if (rtsfr_resource_snapshot(fault->task_id, fault->generation,
-                                &resource) != RTSFR_OK)
-    {
-        (void)memset(&resource, 0, sizeof(resource));
-        resource.task_id = fault->task_id;
-        resource.generation = fault->generation;
-        resource.unknown_resource_count = 1U;
-        resource.can_reclaim_all = false;
     }
     rtsfr_m5_on_fault(fault->event_id, fault->task_id,
                       fault->generation, (uint16_t)fault->fault_type);
     rtsfr_m5_emit(
         M5_RESOURCE_CHECK, rtsfr_m5_test_active(), fault->event_id,
         fault->task_id, fault->generation, 0U,
-        ((uint32_t)resource.mutex_held_count) |
-            ((uint32_t)resource.managed_buffers_owned << 8U) |
-            ((uint32_t)resource.unknown_resource_count << 16U) |
-            (resource.has_inflight_io ? (1UL << 24U) : 0UL) |
-            (resource.can_reclaim_all ? (1UL << 25U) : 0UL));
-    decision = rtsfr_policy_evaluate(fault, &resource);
-    rtsfr_m5_on_decision(&decision);
-    if (((decision.action == RTSFR_ACT_SAFE_MODE) ||
-         (decision.action == RTSFR_ACT_REQUEST_RESET)) &&
-        ((decision.reason_code == RTSFR_POL_REASON_UNSAFE_MUTEX_HELD) ||
-         (decision.reason_code == RTSFR_POL_REASON_UNSAFE_UNKNOWN_RES) ||
-         (decision.reason_code == RTSFR_POL_REASON_UNSAFE_INFLIGHT_IO) ||
-         (decision.reason_code == RTSFR_POL_REASON_UNSAFE_CANNOT_RECLAIM)) &&
+        ((uint32_t)resource->mutex_held_count) |
+            ((uint32_t)resource->managed_buffers_owned << 8U) |
+            ((uint32_t)resource->unknown_resource_count << 16U) |
+            (resource->has_inflight_io ? (1UL << 24U) : 0UL) |
+            (resource->can_reclaim_all ? (1UL << 25U) : 0UL));
+    rtsfr_m5_on_decision(decision);
+    if (((decision->action == RTSFR_ACT_SAFE_MODE) ||
+         (decision->action == RTSFR_ACT_REQUEST_RESET)) &&
+        ((decision->reason_code == RTSFR_POL_REASON_UNSAFE_MUTEX_HELD) ||
+         (decision->reason_code == RTSFR_POL_REASON_UNSAFE_UNKNOWN_RES) ||
+         (decision->reason_code == RTSFR_POL_REASON_UNSAFE_INFLIGHT_IO) ||
+         (decision->reason_code == RTSFR_POL_REASON_UNSAFE_CANNOT_RECLAIM)) &&
         (g_unsafe_restarts_prevented != UINT16_MAX))
     {
         g_unsafe_restarts_prevented++;
     }
-    if (rtsfr_policy_should_invoke_recovery(&decision))
+    if (rtsfr_policy_should_invoke_recovery(decision))
     {
         context = prv_context(fault->task_id);
         context->active_event_id = fault->event_id;
-        if (rtsfr_recovery_request(&decision) == RTSFR_OK)
+        if (decision->action == RTSFR_ACT_RESTART)
         {
-            if (decision.action == RTSFR_ACT_RESTART)
-            {
-                g_recovery_started_tick = xTaskGetTickCount();
-            }
+            g_recovery_started_tick = xTaskGetTickCount();
         }
     }
     (void)rtsfr_system_emit_snapshot();
+}
+
+static void prv_kernel_overflow(uint32_t overflow_count)
+{
+    g_detect_overflow_seen = overflow_count;
+    rtsfr_m5_emit(M5_SAFE_MODE, rtsfr_m5_test_active(),
+                  0xF0000000UL, RTSFR_TASK_ID_NONE, 0U,
+                  RTSFR_POL_REASON_EVENT_QUEUE_OVERFLOW,
+                  overflow_count);
+}
+
+static void prv_kernel_cycle_complete(void)
+{
+    prv_application_maintenance();
 }
 
 static void prv_publish_health(void)
@@ -936,6 +926,7 @@ rtsfr_status_t rtsfr_system_init(void)
     uint16_t mutex_id;
     rtsfr_recovery_hooks_t hooks = {0};
     rtsfr_m5_bindings_t bindings = {0};
+    RtsfrKernelHooks_t kernel_hooks = {0};
 
     (void)memset(g_contexts, 0, sizeof(g_contexts));
     g_ready = false;
@@ -1028,8 +1019,14 @@ rtsfr_status_t rtsfr_system_init(void)
     bindings.report_fault = prv_report_injected_fault;
     bindings.start_test = prv_start_test;
     bindings.snapshot = prv_verify_snapshot;
+    kernel_hooks.on_decision = prv_kernel_decision;
+    kernel_hooks.on_event_overflow = prv_kernel_overflow;
+    kernel_hooks.on_cycle_complete = prv_kernel_cycle_complete;
     if ((rtsfr_m5_bind(&bindings) != RTSFR_OK) ||
-        (rtsfr_health_bind_supervisor(xTaskGetCurrentTaskHandle()) != RTSFR_OK))
+        (xRtsfrKernelGetSupervisorHandle() == NULL) ||
+        (rtsfr_health_bind_supervisor(
+             xRtsfrKernelGetSupervisorHandle()) != RTSFR_OK) ||
+        (xRtsfrKernelConfigure(&kernel_hooks) != pdPASS))
     {
         return RTSFR_ERR_INTERNAL;
     }
@@ -1038,14 +1035,16 @@ rtsfr_status_t rtsfr_system_init(void)
     {
         vTaskResume(prv_context(task_id)->handle);
     }
+    if (xRtsfrKernelEnable() != pdPASS)
+    {
+        g_ready = false;
+        return RTSFR_ERR_INTERNAL;
+    }
     return RTSFR_OK;
 }
 
-void rtsfr_system_poll(void)
+static void prv_application_maintenance(void)
 {
-    rtsfr_fault_event_t fault;
-    rtsfr_recovery_state_t state;
-    uint32_t overflow_count;
     uint32_t cycle_start = 0U;
     if (!g_ready)
     {
@@ -1055,30 +1054,8 @@ void rtsfr_system_poll(void)
     {
         cycle_start = rtsfr_cycles_now();
     }
-    (void)rtsfr_detect_scan(xTaskGetTickCount());
-    overflow_count = rtsfr_detect_event_overflow_count();
-    if (overflow_count != g_detect_overflow_seen)
-    {
-        g_detect_overflow_seen = overflow_count;
-        (void)rtsfr_safe_mode_enter(0xF0000000UL,
-                                    RTSFR_TASK_ID_NONE,
-                                    0U,
-                                    RTSFR_POL_REASON_EVENT_QUEUE_OVERFLOW);
-        rtsfr_m5_emit(M5_SAFE_MODE, rtsfr_m5_test_active(),
-                      0xF0000000UL, RTSFR_TASK_ID_NONE, 0U,
-                      RTSFR_POL_REASON_EVENT_QUEUE_OVERFLOW,
-                      overflow_count);
-    }
-    while (rtsfr_detect_pop_event(&fault))
-    {
-        prv_handle_fault(&fault);
-    }
-    state = rtsfr_recovery_get_state();
-    if ((state >= RTSFR_REC_STATE_QUIESCING) &&
-        (state <= RTSFR_REC_STATE_VERIFYING))
-    {
-        (void)rtsfr_recovery_process();
-    }
+    /* Called by the kernel-owned RTSFR supervisor.  Only test orchestration,
+       health publication and measurement remain in the application adapter. */
     prv_poll_test();
     prv_publish_health();
     if (g_monitor_polls != UINT32_MAX)
@@ -1104,6 +1081,7 @@ bool rtsfr_system_is_ready(void)
 rtsfr_status_t rtsfr_system_get_metrics(rtsfr_system_metrics_t *out)
 {
     uint8_t task_id;
+    RtsfrKernelStats_t kernel_stats;
     if ((out == NULL) || !g_ready)
     {
         return RTSFR_ERR_NOT_READY;
@@ -1129,7 +1107,17 @@ rtsfr_status_t rtsfr_system_get_metrics(rtsfr_system_metrics_t *out)
     out->resource_anomalies = rtsfr_resource_get_anomaly_count();
     out->successful_recoveries = g_successful_recoveries;
     out->unsafe_restarts_prevented = g_unsafe_restarts_prevented;
-    out->false_alarms_rolled_back = g_false_alarms_rolled_back;
+    if (xRtsfrKernelGetStats(&kernel_stats) == pdPASS)
+    {
+        out->false_alarms_rolled_back =
+            (kernel_stats.stale_faults_discarded > UINT16_MAX)
+                ? UINT16_MAX
+                : (uint16_t)kernel_stats.stale_faults_discarded;
+    }
+    else
+    {
+        out->false_alarms_rolled_back = g_false_alarms_rolled_back;
+    }
     return RTSFR_OK;
 }
 

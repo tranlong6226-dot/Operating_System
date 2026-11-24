@@ -303,7 +303,6 @@ void StartBootstrapTask(void *argument)
   for (;;)
   {
 #if configRTSFR_M5_ENABLE
-    rtsfr_system_poll();
     rtsfr_m5_service_poll();
     osDelay(10);
 #else

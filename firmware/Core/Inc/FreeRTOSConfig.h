@@ -164,6 +164,9 @@ void rtsfr_m5_lifecycle(void *handle, unsigned int created);
 #define configRTSFR_EVENT_QUEUE_SIZE             8U
 #define configRTSFR_MAX_TRACKED_MUTEXES          4U
 #define configRTSFR_MAX_MANAGED_BUFFERS          8U
+#define configRTSFR_SUPERVISOR_STACK_DEPTH       320U
+#define configRTSFR_SUPERVISOR_PRIORITY          (tskIDLE_PRIORITY + 3U)
+#define configRTSFR_SUPERVISOR_PERIOD_MS         10U
 #define configRTSFR_M4_TARGET_TEST               0
 #define configRTSFR_M4_TEST_SCENARIO             1
 /* USER CODE END Defines */
